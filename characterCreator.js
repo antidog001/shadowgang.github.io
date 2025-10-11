@@ -155,7 +155,12 @@ function createHPACTable() {
 function refreshHPAC() {
     let tempHp = character.initialHPRoll + findModifier(character.con, character.conbonus)
     character.hp = tempHp > 0 ? tempHp : 1
-    character.ac = 10 + findModifier(character.dex, character.dexbonus)
+    if (character.items.includes("Leather armor")) {
+        console.log("has leather armor")
+        character.ac = 11 + findModifier(character.dex, character.dexbonus)
+    } else {
+        character.ac = 10 + findModifier(character.dex, character.dexbonus)
+    }
 }
 
 function refreshHPACTable() {
@@ -1068,7 +1073,7 @@ const weapons = {
     }
 };
 
-
+const gear = ["Torch", "Dagger", "Pole", "Rations (3)", "Rope, 60'", "Oil, flask", "Crowbar", "Iron spikes (10)", "Flint and steel", "Grappling hook", "Shield", "Caltrops (one bag)"]
 
 let character = null
 let classInfo = null
@@ -1199,6 +1204,16 @@ window.addEventListener('DOMContentLoaded', function() {
             character.items.push(classInfo.items[i])
         }
 
+        if (character.class != "Wizard") {
+            character.items.push("Leather armor")
+        }
+
+        let items = randomInt(1, 6)
+
+        for (let i = 0; i < items; i++) {
+            character.items.push(choice(gear))
+        }
+
         character.spellSlots = classInfo.spells
 
         console.log(character)
@@ -1214,6 +1229,7 @@ window.addEventListener('DOMContentLoaded', function() {
         refreshStatsTable()
 
         contentArea.appendChild(createHPACTable())
+        refreshHPAC()
         refreshHPACTable()
 
         addParagraph(contentArea, "Armor Proficiencies", "heading-small");
