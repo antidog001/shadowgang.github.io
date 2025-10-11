@@ -1,0 +1,393 @@
+@font-face {
+	font-family: 'JSL Blackletter';
+	src: url('./fonts/blackletter.ttf') format("truetype");
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Old Newspaper';
+	src: url('./fonts/oldNewspaper.ttf') format("truetype");
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Pencil';
+	src: url('./fonts/pencil.otf') format("opentype");
+	font-weight: 800;
+	font-style: normal;
+}
+
+.heading-large {
+	font-family: 'Old Newspaper';
+	font-size: 3em;
+	text-align: center;
+}
+
+.heading-small {
+	font-family: 'Old Newspaper';
+	font-size: 1.5em;
+	text-align: center;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	background: #efefef;
+	font-family: sans-serif;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-height: 100vh;
+}
+
+.logo-container {
+	font-family: "JSL Blackletter";
+	font-size: clamp(2rem, 8vw, 6rem);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 80%;
+	padding: 0.1em;
+	position: relative;
+}
+
+.logo {
+	position: relative;
+	display: inline-block;
+	text-align: center;
+	font-family: 'JSL Blackletter';
+	font-size: clamp(2rem, 8vw, 6rem);
+	line-height: 1em;
+}
+
+.logo::before {
+	content: "ShadowGang";
+	visibility: hidden;
+	display: block;
+}
+
+.layer {
+	position: absolute;
+	top: 0;
+	left: 0;
+	white-space: nowrap;
+}
+
+.sheet-table {
+	width: 90%;
+	border-collapse: collapse;
+	table-layout: fixed;
+	text-align: center;
+	vertical-align: middle;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 1em;
+}
+
+
+.sheet-table th+th,
+.sheet-table td+td {
+	border-left: 2px solid Black;
+}
+
+.sheet-table-header {
+	font-size: 1.2em;
+	font-family: "Old Newspaper";
+}
+
+.sheet-table-body {
+	font-size: 2em;
+	font-family: "Pencil";
+}
+
+.purple {
+	color: #704e6f;
+}
+
+.shadow1 {
+	transform: translate(0.09em, 0.11em);
+	z-index: 1;
+}
+
+.shadow2 {
+	transform: translate(0.05em, 0.07em);
+	z-index: -1;
+}
+
+.dark1 {
+	transform: translate(3.05em, 0.11em);
+	z-index: 1;
+}
+
+.dark2 {
+	transform: translate(3.01em, 0.07em);
+	z-index: -1;
+}
+
+button {
+	font-family: "Old Newspaper";
+	font-size: 1.5em;
+	margin-bottom: 2vh;
+}
+
+.card {
+	position: relative;
+	background: #fff;
+	padding: 30px;
+	width: 80%;
+	height: auto;
+	border: 1px solid #bbb;
+	box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.25);
+	box-sizing: border-box;
+	margin-bottom: 4em;
+	font-size: 1em
+}
+
+.card p {
+	padding: 1vh !important;
+	margin: 0 auto !important;
+}
+
+.card::before,
+.card::after {
+	content: "";
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	border: 1px solid #bbb;
+	background: #f5f5f5;
+	box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.25);
+	box-sizing: border-box;
+	transform-origin: top left;
+}
+
+.card::before {
+	top: 0.7em;
+	left: 0.6em;
+	transform: rotate(-1.5deg);
+	z-index: -1;
+}
+
+.card::after {
+	top: -0.7em;
+	left: -0.6em;
+	transform: rotate(1.5deg);
+	z-index: -2;
+}
+
+.box {
+	width: 80%;
+	border: 2px solid Black;
+	margin-left: auto;
+	margin-right: auto;
+	font-family: 'Pencil';
+	font-size: 2em;
+	min-height: 0.3em;
+}
+
+.box .row:nth-child(odd) {
+	background-color: #f0f0f0;
+}
+
+.box .row:nth-child(even) {
+	background-color: #ffffff;
+}
+
+.box .row {
+	padding: 0.3em;
+	padding-left: 1.5em !important;
+	text-indent: -1em;
+}
+
+#languages .row {
+	text-align: center;
+	padding: 0.3em !important;
+	text-indent: 0 !important;
+}
+
+.stat-increase {
+	display: flex;
+	flex-direction: row;
+	gap: 20px;
+	align-items: center;
+	justify-content: center;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.stat-increase label {
+	font-family: "Pencil";
+	font-size: 1.2em;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	cursor: pointer;
+}
+
+input[type="radio"] {
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: #fff;
+	margin: 0;
+	font: inherit;
+	color: black;
+	width: 1.15em;
+	height: 1.15em;
+	border: 0.15em solid black;
+	border-radius: 50%;
+	display: grid;
+	place-content: center;
+	cursor: pointer;
+	box-sizing: border-box;
+}
+
+.stat-increase input[type="radio"] {
+	margin-right: 5px;
+}
+
+
+input[type="radio"]::before {
+	content: "";
+	width: 0.65em;
+	height: 0.65em;
+	border-radius: 50%;
+	transform: scale(0);
+	transition: 120ms transform ease-in-out;
+	background-color: Black;
+}
+
+
+input[type="radio"]:checked::before {
+	transform: scale(1);
+}
+
+.twelve-choice {
+	font-family: "Pencil";
+	font-size: 1.2em;
+	display: flex;
+	align-items: center;
+	gap: 0.1em;
+}
+
+.twelve-choice p:hover {
+	text-decoration: underline;
+}
+
+select {
+	appearance: none;
+	font-family: "Pencil";
+	width: 20%;
+	font-size: 1.5rem;
+	padding: 0.5em;
+	background-color: White;
+	border: 4px solid Black;
+	border-radius: 0.25rem;
+	color: Black;
+	cursor: pointer;
+	text-align: center;
+}
+
+.dropdowns {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.2em;
+}
+
+.spells-table {
+	border-collapse: collapse;
+	width: 90%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.spells-table tr td {
+	font-family: "Pencil";
+	font-size: 1.5em;
+	padding: 0.1em;
+}
+
+.spells-table .spell-name {
+	font-family: "Old Newspaper";
+	font-size: 1.75em;
+	text-align: center;
+}
+
+.spells-table tr {
+	border-bottom: 2px solid Black;
+}
+
+.spells-table tr:last-child {
+	border-bottom: none;
+}
+
+.weapons-table {
+	border-collapse: collapse;
+	width: 90%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.weapons-table tr td {
+	font-family: "Pencil";
+	font-size: 1.5em;
+	padding: 0.1em;
+}
+
+.weapons-table .weapon-name {
+	font-family: "Old Newspaper";
+	font-size: 1.75em;
+	text-align: center;
+}
+
+.weapons-table tr {
+	border-bottom: 2px solid Black;
+}
+
+.weapons-table tr:last-child {
+	border-bottom: none;
+}
+
+.disabled {
+	color: DarkGray;
+}
+
+input[type="checkbox"] {
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: #fff;
+	margin: 0;
+	display: inline-grid;
+	place-items: center;
+	font: inherit;
+	color: currentColor;
+	width: 1.15em;
+	height: 1.15em;
+	border: 0.15em solid currentColor;
+	border-radius: 0.15em;
+	place-content: center;
+	cursor: pointer;
+	box-sizing: border-box;
+}
+
+input[type="checkbox"]::before {
+	content: "";
+	display: block;
+	width: 0.65em;
+	height: 0.65em;
+	transform: scale(0);
+	transition: 120ms transform ease-in-out;
+	background-color: Black;
+}
+
+input[type="checkbox"]:checked::before {
+	transform: scale(1);
+}
+
+.miscinfo {
+	font-family: "Pencil";
+	font-size: 2em;
+	text-align: center;
+}
