@@ -19,6 +19,76 @@
 	font-style: normal;
 }
 
+@media only screen and (max-width: 450px) {
+	.card::before,
+	.card::after {
+		content: none !important;
+		display: none !important;
+		background: none !important;
+		box-shadow: none !important;
+		transform: none !important;
+	}
+
+	.sheet-table {
+		width: 95%;
+		border-collapse: collapse;
+		table-layout: fixed;
+		text-align: center;
+		vertical-align: middle;
+		margin-left: auto;
+		margin-right: auto;
+		margin-bottom: 1em;
+	}
+
+	.sheet-table-header {
+		font-size: 0.8em;
+		font-family: "Old Newspaper";
+	}
+
+	.sheet-table-body {
+		font-size: 1.2em;
+		font-family: "Pencil";
+	}
+
+	.spells-table {
+		border-collapse: collapse;
+		width: 95%;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	
+	.spells-table tr td {
+		font-family: "Pencil";
+		font-size: 0.6em;
+		padding: 0.1em;
+	}
+	
+	.spells-table .spell-name {
+		font-family: "Old Newspaper";
+		font-size: 1.2em;
+		text-align: center;
+	}
+
+	.weapons-table {
+		border-collapse: collapse;
+		width: 95%;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	
+	.weapons-table tr td {
+		font-family: "Pencil";
+		font-size: 0.6em;
+		padding: 0.1em;
+	}
+	
+	.weapons-table .weapon-name {
+		font-family: "Old Newspaper";
+		font-size: 1.2em;
+		text-align: center;
+	}
+}
+
 .heading-large {
 	font-family: 'Old Newspaper';
 	font-size: 3em;
