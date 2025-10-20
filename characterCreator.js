@@ -44,8 +44,8 @@ function getStats() {
 }
 
 function createMiscTable() {
+    const misctable = document.createElement("table");
     if (window.mobileCheck()) { // doing it this way because it needs no refresh
-        const misctable = document.createElement("table");
         misctable.className = "sheet-table";
         const miscthead1 = document.createElement("thead");
         miscthead1.className = "sheet-table-header";
@@ -81,7 +81,6 @@ function createMiscTable() {
         `;
         misctable.append(miscthead1, misctbody1, miscthead2, misctbody2);
     } else {
-        const misctable = document.createElement("table");
         misctable.className = "sheet-table";
         const miscthead = document.createElement("thead");
         miscthead.className = "sheet-table-header";
