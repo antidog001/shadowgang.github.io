@@ -19,7 +19,21 @@
 	font-style: normal;
 }
 
-@media only screen and (max-width: 450px) {
+@media only screen and (max-width: 500px) {
+	button {
+		width: 50% !important;
+		margin-bottom: 1vh !important;
+		font-size: clamp(0.4em, 0.8em, 1.2em) !important;
+	}
+
+	.heading-large {
+		font-size: 2em !important;
+	}
+
+	.heading-small {
+		font-size: 1em !important;
+	}
+
 	.card::before,
 	.card::after {
 		content: none !important;
@@ -30,62 +44,60 @@
 	}
 
 	.sheet-table {
-		width: 95%;
-		border-collapse: collapse;
-		table-layout: fixed;
-		text-align: center;
-		vertical-align: middle;
-		margin-left: auto;
-		margin-right: auto;
-		margin-bottom: 1em;
+		width: 95% !important;
 	}
 
 	.sheet-table-header {
-		font-size: 0.8em;
-		font-family: "Old Newspaper";
+		font-size: 0.8em !important;
 	}
 
 	.sheet-table-body {
-		font-size: 1.2em;
-		font-family: "Pencil";
+		font-size: 1.2em !important;
+	}
+
+	.box {
+		width: 90% !important;
+		font-size: 1.2em !important;
 	}
 
 	.spells-table {
-		border-collapse: collapse;
-		width: 95%;
-		margin-left: auto;
-		margin-right: auto;
+		width: 95% !important;
 	}
 	
 	.spells-table tr td {
-		font-family: "Pencil";
-		font-size: 0.6em;
-		padding: 0.1em;
+		font-size: 0.8em !important;
+		padding: 0.2em !important;
 	}
 	
 	.spells-table .spell-name {
-		font-family: "Old Newspaper";
-		font-size: 1.2em;
-		text-align: center;
+		font-size: 1em !important;
 	}
 
 	.weapons-table {
-		border-collapse: collapse;
-		width: 95%;
-		margin-left: auto;
-		margin-right: auto;
+		width: 95% !important;
 	}
 	
 	.weapons-table tr td {
-		font-family: "Pencil";
-		font-size: 0.6em;
-		padding: 0.1em;
+		font-size: 0.8em !important;
+		padding: 0.2em !important;
 	}
 	
 	.weapons-table .weapon-name {
-		font-family: "Old Newspaper";
-		font-size: 1.2em;
-		text-align: center;
+		font-size: 1em !important;
+	}
+
+	.miscinfo {
+		font-size: 1.2em !important;
+	}
+
+	.stat-increase label {
+		font-size: 0.8em !important;
+	}
+
+	select {
+		width: 80% !important;
+		font-size: 1rem !important;
+		padding: 0.2em !important;
 	}
 }
 
@@ -198,8 +210,25 @@ body {
 
 button {
 	font-family: "Old Newspaper";
-	font-size: 1.5em;
-	margin-bottom: 2vh;
+	font-size: 1.6em;
+	margin-bottom: 3vh;
+	background-color: #f5f5f5;
+	border: none;
+	color: Black;
+	padding: 0.1em 0.2em;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	cursor: pointer;
+	border-radius: 0.2em;
+	transition: 0.3s;
+	border: 1px solid Black;
+}
+
+button:hover {
+	background-color: Black;
+	color: #f5f5f5;
+	border: 1px solid Black;
 }
 
 .card {
@@ -211,7 +240,7 @@ button {
 	border: 1px solid #bbb;
 	box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.25);
 	box-sizing: border-box;
-	margin-bottom: 4em;
+	margin-bottom: 1em;
 	font-size: 1em
 }
 
@@ -280,6 +309,7 @@ button {
 .stat-increase {
 	display: flex;
 	flex-direction: row;
+	flex-wrap: wrap;
 	gap: 20px;
 	align-items: center;
 	justify-content: center;
@@ -337,6 +367,7 @@ input[type="radio"]:checked::before {
 	font-family: "Pencil";
 	font-size: 1.2em;
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	gap: 0.1em;
 }
@@ -348,7 +379,7 @@ input[type="radio"]:checked::before {
 select {
 	appearance: none;
 	font-family: "Pencil";
-	width: 20%;
+	width: 40%;
 	font-size: 1.5rem;
 	padding: 0.5em;
 	background-color: White;
@@ -376,7 +407,9 @@ select {
 .spells-table tr td {
 	font-family: "Pencil";
 	font-size: 1.5em;
-	padding: 0.1em;
+	padding: 0.3em;
+	text-align: justify;
+  	text-justify: inter-word;
 }
 
 .spells-table .spell-name {
@@ -459,5 +492,12 @@ input[type="checkbox"]:checked::before {
 .miscinfo {
 	font-family: "Pencil";
 	font-size: 2em;
+	text-align: center;
+}
+
+.footer {
+	font-size: 0.7em;
+	color: #8a8a8a;
+	width: 100%;
 	text-align: center;
 }
