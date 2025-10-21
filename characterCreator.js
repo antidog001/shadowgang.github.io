@@ -287,8 +287,7 @@ function createRadio(radioType) {
 }
 
 function talentRoll() {
-    // let talentRoll = randomInt(1, 6) + randomInt(1, 6)
-    let talentRoll = 12
+    let talentRoll = randomInt(1, 6) + randomInt(1, 6)
     let temp = 0
     for (const key in classInfo.talents) {
         if (talentRoll >= temp && talentRoll <= key) { // talent keys are max of range
@@ -1385,3 +1384,4 @@ window.addEventListener('DOMContentLoaded', function() {
 
     }
 });
+
