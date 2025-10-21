@@ -193,7 +193,6 @@ function refreshHPAC() {
     let tempHp = character.initialHPRoll + findModifier(character.con, character.conbonus)
     character.hp = tempHp > 0 ? tempHp : 1
     if (character.items.includes("Leather armor")) {
-        console.log("has leather armor")
         character.ac = 11 + findModifier(character.dex, character.dexbonus)
     } else {
         character.ac = 10 + findModifier(character.dex, character.dexbonus)
@@ -396,6 +395,7 @@ function giantPulsatingTalentsHandler(type, targets) {
             refreshSpellsBox()
             break
         case "wizardLanguages":
+            console.log("wizard languages")
             addParagraph(contentArea, "You know two additional common languages and two rare languages.", "heading-small")
             const languageDiv = document.createElement("div")
             languageDiv.className = "dropdowns"
@@ -407,6 +407,7 @@ function giantPulsatingTalentsHandler(type, targets) {
                 wrapper.onchange = function() {
                     refreshLanguageBox()
                 }
+                wrapper.innerHTML = "<option disabled selected value> -- select an option -- </option>"
                 for (var j = 0; j < common.length; j++) {
                     if (!character.languages.includes(common[j])) {
                         var option = document.createElement("option")
@@ -423,6 +424,7 @@ function giantPulsatingTalentsHandler(type, targets) {
                 wrapper.onchange = function() {
                     refreshLanguageBox()
                 }
+                wrapper.innerHTML = "<option disabled selected value> -- select an option -- </option>"
                 for (var j = 0; j < rare.length; j++) {
                     if (!character.languages.includes(rare[j])) {
                         var option = document.createElement("option")
@@ -455,6 +457,29 @@ function giantPulsatingTalentsHandler(type, targets) {
         case "spellSlot":
             character.spellSlots++
             refreshSpellsBox()
+            break
+        case "priestLanguage":
+            console.log("wizard languages")
+            addParagraph(contentArea, "You know either Celestial, Diabolic, or Primordial.", "heading-small")
+            const languageDiv2 = document.createElement("div")
+            languageDiv2.className = "dropdowns"
+            const priestlyLanguages = ["Celestial", "Diabolic", "Primordial"]
+            var wrapper = document.createElement("select")
+            wrapper.name = "addlLanguage"
+            wrapper.onchange = function() {
+                refreshLanguageBox()
+            }
+            wrapper.innerHTML = "<option disabled selected value> -- select an option -- </option>"
+            for (var j = 0; j < priestlyLanguages.length; j++) {
+                if (!character.languages.includes(priestlyLanguages[j])) {
+                    var option = document.createElement("option")
+                    option.value = priestlyLanguages[j]
+                    option.innerHTML = priestlyLanguages[j]
+                    wrapper.appendChild(option)
+                }
+            }
+            languageDiv2.appendChild(wrapper)
+            contentArea.appendChild(languageDiv2)
             break
     }
 }
@@ -529,12 +554,18 @@ function generateSpellSelector() {
             tdName.className = "spell-name"
             tr.appendChild(tdName)
 
-            const tdMisc = document.createElement("td")
-            tdMisc.innerHTML = `${spells[key].duration}, ${spells[key].range}`
-            tr.appendChild(tdMisc)
+            if (!window.mobileCheck()) {
+                const tdMisc = document.createElement("td")
+                tdMisc.innerHTML = `${spells[key].duration}, ${spells[key].range}`
+                tr.appendChild(tdMisc)
+            }
 
             const tdDesc = document.createElement("td")
-            tdDesc.innerHTML = spells[key].description
+            if (!window.mobileCheck()) {
+                tdDesc.innerHTML = spells[key].description
+            } else {
+                tdDesc.innerHTML = `${spells[key].duration}, ${spells[key].range} - ${spells[key].description}`
+            }
             tr.appendChild(tdDesc)
 
             table.appendChild(tr)
@@ -1238,6 +1269,11 @@ window.addEventListener('DOMContentLoaded', function() {
                     type: "turnUndead",
                     description: "Turn Undead. You know the turn undead spell. It doesn't count toward your number of known spells."
                 }
+            } else if (misc == "Languages. You know Celestial, Diabolic, or Primordial.") {
+                talent = {
+                    type: "priestLanguage",
+                    description: "Languages. You know Celestial, Diabolic, or Primordial."
+                }
             }
             character.talentsSkills[j] = talent
             j++
@@ -1300,7 +1336,7 @@ window.addEventListener('DOMContentLoaded', function() {
             refreshSpellsBox()
         }
 
-        let customizationRequired = ["human", "statIncrease", "twelve", "wizardLanguages", "wizardIncrease"]
+        let customizationRequired = ["human", "statIncrease", "twelve", "wizardLanguages", "wizardIncrease", "priestLanguage"]
 
         for (const key in character.talentsSkills) {
             if (customizationRequired.includes(character.talentsSkills[key].type)) {
@@ -1311,7 +1347,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 refreshLanguageBox()
 
                 for (const key in character.talentsSkills) {
-                    if (character.talentsSkills != "text") {
+                    if (character.talentsSkills[key].type != "text") {
                         giantPulsatingTalentsHandler(character.talentsSkills[key].type, 'targets' in character.talentsSkills[key] ? character.talentsSkills[key].targets : null)
                     }
                 }
