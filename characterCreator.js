@@ -287,7 +287,8 @@ function createRadio(radioType) {
 }
 
 function talentRoll() {
-    let talentRoll = randomInt(1, 6) + randomInt(1, 6)
+    // let talentRoll = randomInt(1, 6) + randomInt(1, 6)
+    let talentRoll = 12
     let temp = 0
     for (const key in classInfo.talents) {
         if (talentRoll >= temp && talentRoll <= key) { // talent keys are max of range
@@ -305,6 +306,7 @@ function talentRoll() {
 }
 
 function giantPulsatingTalentsHandler(type, targets) {
+    var contentArea = document.getElementById("customization")
     switch (type) {
         case "human":
             talentRoll()
@@ -1344,6 +1346,9 @@ window.addEventListener('DOMContentLoaded', function() {
                 contentArea.appendChild(document.createElement("br"))
                 contentArea.appendChild(document.createElement("hr"))
                 addParagraph(contentArea, "Customization", "heading-large");
+                var customizationDiv = document.createElement("div")
+                customizationDiv.id = "customization"
+                contentArea.appendChild(customizationDiv)
                 refreshLanguageBox()
 
                 for (const key in character.talentsSkills) {
