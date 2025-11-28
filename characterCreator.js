@@ -1,4 +1,4 @@
-import { grimoire_classes, grimoire_backgrounds, grimoire_spells, grimoire_weapons, patron_boons, black_lotus } from "./info.js";
+import { grimoire_classes, grimoire_backgrounds, grimoire_spells, grimoire_weapons, patron_boons, black_lotus } from "/info.js";
 
 function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min; // this is inclusive
@@ -301,7 +301,7 @@ function rollTalent(table, prefix) {
                 ...talent
             } // i don't want to manually add the Talent. thing
             tempTalent.description = `${prefix}. ${talent.description}`
-            character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+            character.talentsSkills[Object.keys(character.talentsSkills).length] = tempTalent
             break
         } else {
             temp = key
@@ -318,9 +318,9 @@ function giantPulsatingTalentsHandler(type, targets) {
                 giantPulsatingTalentsHandler("talentBoonChoice", null);
             } else {
                 rollTalent(classInfo.talents, "Talent");
+                const talentsKeys = Object.keys(character.talentsSkills)
+                giantPulsatingTalentsHandler(character.talentsSkills[Object.keys(character.talentsSkills).length - 1].type, 'targets' in character.talentsSkills[talentsKeys[talentsKeys.length - 1]] ? character.talentsSkills[talentsKeys[talentsKeys.length - 1]].targets : null)
             }
-            const talentsKeys = Object.keys(character.talentsSkills)
-            giantPulsatingTalentsHandler(character.talentsSkills[Object.keys(character.talentsSkills).length].type, 'targets' in character.talentsSkills[talentsKeys[talentsKeys.length - 1]] ? character.talentsSkills[talentsKeys[talentsKeys.length - 1]].targets : null)
             refreshTalentsBox()
             break
         case "statIncrease":
@@ -366,7 +366,7 @@ function giantPulsatingTalentsHandler(type, targets) {
                         ...classInfo.talents[key]
                     }
                     tempTalent.description = "Talent. " + tempTalent.description
-                    character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+                    character.talentsSkills[Object.keys(character.talentsSkills).length] = tempTalent
                     giantPulsatingTalentsHandler(classInfo.talents[key].type, 'targets' in classInfo.talents[key] ? classInfo.talents[key].targets : null)
                     heading.remove()
                     div.remove()
@@ -377,7 +377,7 @@ function giantPulsatingTalentsHandler(type, targets) {
             p = document.createElement('p');
             p.textContent = "+2 increase to any stat";
             p.onclick = function() {
-                character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = {
+                character.talentsSkills[Object.keys(character.talentsSkills).length] = {
                     type: "statIncrease",
                     description: "Talent. +2 to any stat.",
                     targets: ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"]
@@ -529,7 +529,7 @@ function giantPulsatingTalentsHandler(type, targets) {
                         ...patron_boons[character.patron][key]
                     }
                     tempTalent.description = "Boon. " + tempTalent.description
-                    character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+                    character.talentsSkills[Object.keys(character.talentsSkills).length] = tempTalent
                     giantPulsatingTalentsHandler(patron_boons[character.patron][key].type, 'targets' in patron_boons[character.patron][key] ? patron_boons[character.patron][key].targets : null)
                     heading.remove()
                     div.remove()
@@ -540,7 +540,7 @@ function giantPulsatingTalentsHandler(type, targets) {
             p = document.createElement('p');
             p.textContent = "+2 increase to any stat";
             p.onclick = function() {
-                character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = {
+                character.talentsSkills[Object.keys(character.talentsSkills).length] = {
                     type: "statIncrease",
                     description: "Talent. +2 to any stat.",
                     targets: ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"]
@@ -576,6 +576,7 @@ function giantPulsatingTalentsHandler(type, targets) {
             p.onclick = function() {
                 talentRoll = randomInt(1, 6) + randomInt(1, 6)
                 temp = 0
+                console.log(talentRoll)
                 for (const key in patron_boons[character.patron]) {
                     if (talentRoll >= temp && talentRoll <= key) { // talent keys are max of range
                         talent = patron_boons[character.patron][key]
@@ -583,7 +584,7 @@ function giantPulsatingTalentsHandler(type, targets) {
                             ...talent
                         }
                         tempTalent.description = `Boon. ${talent.description}`
-                        character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+                        character.talentsSkills[Object.keys(character.talentsSkills).length] = tempTalent
                         break
                     } else {
                         temp = key
@@ -607,7 +608,7 @@ function giantPulsatingTalentsHandler(type, targets) {
                             ...talent
                         }
                         tempTalent.description = `Talent. ${talent.description}`
-                        character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+                        character.talentsSkills[Object.keys(character.talentsSkills).length] = tempTalent
                         break
                     } else {
                         temp = key
@@ -655,7 +656,7 @@ function giantPulsatingTalentsHandler(type, targets) {
                             ...talent
                         }
                         tempTalent.description = `Talent. ${talent.description}`
-                        character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+                        character.talentsSkills[Object.keys(character.talentsSkills).length] = tempTalent
                         break
                     } else {
                         temp = key
@@ -690,7 +691,7 @@ function giantPulsatingTalentsHandler(type, targets) {
                 p = document.createElement('p');
                 p.textContent = tempTalent.description;
                 p.onclick = function() {
-                    character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+                    character.talentsSkills[Object.keys(character.talentsSkills).length] = tempTalent
                     giantPulsatingTalentsHandler(tempTalent.type, 'targets' in tempTalent ? tempTalent.targets : null)
                     heading.remove()
                     div.remove()
@@ -753,7 +754,7 @@ function giantPulsatingTalentsHandler(type, targets) {
             var tempTalent = {}
             tempTalent = black_lotus[blackLotusRoll]
             tempTalent.description = "Black Lotus Talent. " + tempTalent.description
-            character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+            character.talentsSkills[Object.keys(character.talentsSkills).length] = tempTalent
             giantPulsatingTalentsHandler(tempTalent.type, 'targets' in tempTalent ? tempTalent.targets : null)
             refreshTalentsBox()
             break
@@ -764,7 +765,7 @@ function giantPulsatingTalentsHandler(type, targets) {
                 blackLotusRoll = randomInt(2, 12)
                 tempTalent = black_lotus[blackLotusRoll]
                 tempTalent.description = "Black Lotus Talent. " + tempTalent.description
-                character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+                character.talentsSkills[Object.keys(character.talentsSkills).length] = tempTalent
                 giantPulsatingTalentsHandler(tempTalent.type, 'targets' in tempTalent ? tempTalent.targets : null)
             }
             refreshTalentsBox()
@@ -851,7 +852,7 @@ function giantPulsatingTalentsHandler(type, targets) {
                         ...classInfo.talents[key]
                     }
                     tempTalent.description = "Talent. " + tempTalent.description
-                    character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+                    character.talentsSkills[Object.keys(character.talentsSkills).length] = tempTalent
                     giantPulsatingTalentsHandler(classInfo.talents[key].type, 'targets' in classInfo.talents[key] ? classInfo.talents[key].targets : null)
                     heading.remove()
                     div.remove()
@@ -1469,10 +1470,10 @@ function makePDF() {
         doc.text(((findModifier(character.cha, character.chabonus) >= 0 ? "+" : "") + findModifier(character.cha, character.chabonus).toString()), 71, 102);
 
         doc.setFontSize(32);
-        doc.text((character.hp + character.hpbonus).toString(), 25, 134)
+        doc.text((character.hp).toString(), 25, 134)
 
         doc.setFontSize(32);
-        doc.text((character.ac + character.acbonus).toString(), 60, 134)
+        doc.text((character.ac).toString(), 60, 134)
 
         let y = 32
         let x = 170
@@ -1481,14 +1482,14 @@ function makePDF() {
         for (const talent_key in character.talentsSkills) {
             let desc = character.talentsSkills[talent_key].description
             let header = desc.split(".", 1)[0]
-            if (header.includes("Talent") || header.includes("Boon")) {
+            if (header.includes("Talent") || (header.includes("Boon") && header.length < 8)) {
                 let currLine = ""
                 let len = 0
                 x = 170
                 for (let i = 0; i < desc.length; i++) {
                     len++
                     currLine += desc[i]
-                    if (desc[i] == " " && len > 44) {
+                    if (desc[i] == " " && len > 42) {
                         doc.text(currLine, x, y)
                         y += 6
                         currLine = ""
@@ -1508,7 +1509,7 @@ function makePDF() {
         }
 
         for (const spell_key in character.spells) {
-            doc.text(character.spells[spell_key].name + ".", 170, y)
+            doc.text("Spell - " + character.spells[spell_key].name + ".", 170, y)
             y += 8
         }
 
@@ -1657,7 +1658,7 @@ window.addEventListener('DOMContentLoaded', function() {
     
     var contentArea = document.getElementById("contentArea")
 
-    var genButton = document.getElementById("genButton")
+    genButton = document.getElementById("genButton")
     genButton.onclick = function() {
         printButton.style.display = "block";
         character = {
@@ -1699,7 +1700,11 @@ window.addEventListener('DOMContentLoaded', function() {
 
         raceInfo = null
         classInfo = null
+
+        
         character.race = choice(raceArray)
+
+        character.race = "Human"
         switch (character.race) {
             case "Dwarf":
                 raceInfo = races.dwarf
@@ -1796,6 +1801,8 @@ window.addEventListener('DOMContentLoaded', function() {
         } else {
             character.class = choice(classArray)
         }
+
+        character.class = "Warlock"
 
         console.log(tempClassArray)
 
@@ -2052,5 +2059,3 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
-
-
