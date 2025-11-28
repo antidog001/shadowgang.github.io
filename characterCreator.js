@@ -1,4 +1,4 @@
-import { grimoire_classes, grimoire_backgrounds, grimoire_spells, grimoire_weapons, patron_boons, black_lotus } from "/info.js";
+import { grimoire_classes, grimoire_backgrounds, grimoire_spells, grimoire_weapons, patron_boons, black_lotus } from "./info.js";
 
 function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min; // this is inclusive
@@ -2052,3 +2052,4 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
