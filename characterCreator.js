@@ -1,3 +1,5 @@
+import { grimoire_classes, grimoire_backgrounds, grimoire_spells, grimoire_weapons, patron_boons, black_lotus } from "/info.js";
+
 function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min; // this is inclusive
 }
@@ -190,12 +192,12 @@ function createHPACTable() {
 }
 
 function refreshHPAC() {
-    let tempHp = character.initialHPRoll + findModifier(character.con, character.conbonus)
+    let tempHp = character.initialHPRoll + findModifier(character.con, character.conbonus) + character.hpbonus
     character.hp = tempHp > 0 ? tempHp : 1
     if (character.items.includes("Leather armor")) {
-        character.ac = 11 + findModifier(character.dex, character.dexbonus)
+        character.ac = 11 + findModifier(character.dex, character.dexbonus) + character.acbonus;
     } else {
-        character.ac = 10 + findModifier(character.dex, character.dexbonus)
+        character.ac = 10 + findModifier(character.dex, character.dexbonus) + character.acbonus;
     }
 }
 
@@ -286,16 +288,19 @@ function createRadio(radioType) {
     return label
 }
 
-function talentRoll() {
+function rollTalent(table, prefix) {
+    let talent = null
+    let tempTalent = null
+    // let talentRoll = 11
     let talentRoll = randomInt(1, 6) + randomInt(1, 6)
     let temp = 0
-    for (const key in classInfo.talents) {
+    for (const key in table) {
         if (talentRoll >= temp && talentRoll <= key) { // talent keys are max of range
-            talent = classInfo.talents[key]
+            talent = table[key]
             tempTalent = {
                 ...talent
             } // i don't want to manually add the Talent. thing
-            tempTalent.description = `Talent. ${talent.description}`
+            tempTalent.description = `${prefix}. ${talent.description}`
             character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
             break
         } else {
@@ -306,9 +311,14 @@ function talentRoll() {
 
 function giantPulsatingTalentsHandler(type, targets) {
     var contentArea = document.getElementById("customization")
+    var p = null
     switch (type) {
         case "human":
-            talentRoll()
+            if (character.class == "Warlock") {
+                giantPulsatingTalentsHandler("talentBoonChoice", null);
+            } else {
+                rollTalent(classInfo.talents, "Talent");
+            }
             const talentsKeys = Object.keys(character.talentsSkills)
             giantPulsatingTalentsHandler(character.talentsSkills[Object.keys(character.talentsSkills).length].type, 'targets' in character.talentsSkills[talentsKeys[talentsKeys.length - 1]] ? character.talentsSkills[talentsKeys[talentsKeys.length - 1]].targets : null)
             refreshTalentsBox()
@@ -344,6 +354,7 @@ function giantPulsatingTalentsHandler(type, targets) {
             var div = document.createElement("div")
             div.id = "twelve" + dialogNum
             div.className = "twelve-choice"
+            var tempTalent = {}
             for (const key in classInfo.talents) {
                 if (key == 12) {
                     break
@@ -396,12 +407,11 @@ function giantPulsatingTalentsHandler(type, targets) {
             refreshSpellsBox()
             break
         case "wizardLanguages":
-            console.log("wizard languages")
             addParagraph(contentArea, "You know two additional common languages and two rare languages.", "heading-small")
             const languageDiv = document.createElement("div")
             languageDiv.className = "dropdowns"
-            const common = ["Common", "Dwarvish", "Elvish", "Giant", "Goblin", "Merran", "Orcish", "Reptilian", "Sylvan", "Thanian"]
-            const rare = ["Celestial", "Diabolic", "Draconic", "Primordial"]
+            var common = ["Common", "Dwarvish", "Elvish", "Giant", "Goblin", "Merran", "Orcish", "Reptilian", "Sylvan", "Thanian"]
+            var rare = ["Celestial", "Diabolic", "Draconic", "Primordial"]
             for (var i = 0; i < 2; i++) {
                 var wrapper = document.createElement("select")
                 wrapper.name = "addlLanguage"
@@ -460,7 +470,6 @@ function giantPulsatingTalentsHandler(type, targets) {
             refreshSpellsBox()
             break
         case "priestLanguage":
-            console.log("wizard languages")
             addParagraph(contentArea, "You know either Celestial, Diabolic, or Primordial.", "heading-small")
             const languageDiv2 = document.createElement("div")
             languageDiv2.className = "dropdowns"
@@ -482,10 +491,384 @@ function giantPulsatingTalentsHandler(type, targets) {
             languageDiv2.appendChild(wrapper)
             contentArea.appendChild(languageDiv2)
             break
+        case "knightLanguage":
+            character.languages.push("Diabolic")
+            refreshLanguageBox()
+            break
+        case "almazzatIncrease":
+            addParagraph(contentArea, "You get a +2 increase to Strength or Constitution, or a +1 bonus to melee damage.", "heading-small")
+            var div = document.createElement("div")
+            div.className = "stat-increase"
+            div.onclick = function() {
+                handleStatIncrease()
+            }
+            div.appendChild(createRadio("Strength"))
+            div.appendChild(createRadio("Constitution"))
+            div.appendChild(createRadio("Melee Damage"))
+            contentArea.appendChild(div)
+            dialogNum++
+            refreshSpellsBox()
+            break
+        case "twelveBoon":
+            var heading = document.createElement('p');
+            heading.className = "heading-small";
+            heading.textContent = "You gain a boon of your choice, or a +2 increase to any stat.";
+            contentArea.appendChild(heading);
+            var div = document.createElement("div")
+            div.id = "twelve" + dialogNum
+            div.className = "twelve-choice"
+            var tempTalent = {}
+            for (const key in patron_boons[character.patron]) {
+                if (key == 12) {
+                    break
+                }
+                p = document.createElement('p');
+                p.textContent = patron_boons[character.patron][key].description;
+                p.onclick = function() {
+                    tempTalent = {
+                        ...patron_boons[character.patron][key]
+                    }
+                    tempTalent.description = "Boon. " + tempTalent.description
+                    character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+                    giantPulsatingTalentsHandler(patron_boons[character.patron][key].type, 'targets' in patron_boons[character.patron][key] ? patron_boons[character.patron][key].targets : null)
+                    heading.remove()
+                    div.remove()
+                    refreshTalentsBox()
+                }
+                div.appendChild(p);
+            }
+            p = document.createElement('p');
+            p.textContent = "+2 increase to any stat";
+            p.onclick = function() {
+                character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = {
+                    type: "statIncrease",
+                    description: "Talent. +2 to any stat.",
+                    targets: ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"]
+                }
+                giantPulsatingTalentsHandler("statIncrease", ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"])
+                heading.remove()
+                div.remove()
+                refreshTalentsBox()
+            }
+            div.appendChild(p);
+            contentArea.appendChild(div)
+            dialogNum++
+            break
+        case "acIncrease":
+            character.acbonus += 1
+            refreshHPAC()
+            refreshHPACTable()
+            break
+        case "talentBoonChoice":
+            var heading = document.createElement('p');
+            heading.className = "heading-small";
+            heading.textContent = `You gain a roll on ${character.patron}'s boon table or the Warlock talent table.`;
+            contentArea.appendChild(heading);
+            var div = document.createElement("div")
+            div.id = "twelve" + dialogNum
+            div.className = "twelve-choice"
+            var tempTalent = {}
+            var talentRoll = 0
+            var temp = 0
+            var talent = null
+            p = document.createElement('p');
+            p.textContent = "Patron Boon";
+            p.onclick = function() {
+                talentRoll = randomInt(1, 6) + randomInt(1, 6)
+                temp = 0
+                for (const key in patron_boons[character.patron]) {
+                    if (talentRoll >= temp && talentRoll <= key) { // talent keys are max of range
+                        talent = patron_boons[character.patron][key]
+                        tempTalent = {
+                            ...talent
+                        }
+                        tempTalent.description = `Boon. ${talent.description}`
+                        character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+                        break
+                    } else {
+                        temp = key
+                    }
+                }
+                giantPulsatingTalentsHandler(tempTalent.type, 'targets' in tempTalent ? tempTalent.targets : null)
+                heading.remove()
+                div.remove()
+                refreshTalentsBox()
+            }
+            div.appendChild(p);
+            p = document.createElement('p');
+            p.textContent = "Talent Roll";
+            p.onclick = function() {
+                talentRoll = randomInt(1, 6) + randomInt(1, 6)
+                temp = 0
+                for (const key in classInfo.talents) {
+                    if (talentRoll >= temp && talentRoll <= key) { // talent keys are max of range
+                        talent = classInfo.talents[key]
+                        tempTalent = {
+                            ...talent
+                        }
+                        tempTalent.description = `Talent. ${talent.description}`
+                        character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+                        break
+                    } else {
+                        temp = key
+                    }
+                }
+                giantPulsatingTalentsHandler(tempTalent.type, 'targets' in tempTalent ? tempTalent[key].targets : null)
+                heading.remove()
+                div.remove()
+                refreshTalentsBox()
+            }
+            div.appendChild(p);
+            contentArea.appendChild(div)
+            dialogNum++
+            break
+        case "warlockLanguage":
+            addParagraph(contentArea, "You know either Celestial, Diabolic, Draconic, Primordial, or Sylvan.", "heading-small")
+            const languageDiv3 = document.createElement("div")
+            languageDiv3.className = "dropdowns"
+            const diabolicLanguages = ["Celestial", "Diabolic", "Draconic", "Primordial", "Sylvan"]
+            var wrapper = document.createElement("select")
+            wrapper.name = "addlLanguage"
+            wrapper.onchange = function() {
+                refreshLanguageBox()
+            }
+            wrapper.innerHTML = "<option disabled selected value> -- select an option -- </option>"
+            for (var j = 0; j < diabolicLanguages.length; j++) {
+                if (!character.languages.includes(diabolicLanguages[j])) {
+                    var option = document.createElement("option")
+                    option.value = diabolicLanguages[j]
+                    option.innerHTML = diabolicLanguages[j]
+                    wrapper.appendChild(option)
+                }
+            }
+            languageDiv3.appendChild(wrapper)
+            contentArea.appendChild(languageDiv3)
+            break
+        case "randomBoon":
+            let randomPatron = choice(["Almazzat", "Kytheros", "Shune the Vile", "Mugdulblub", "Titania", "The Willowman"])
+            var talentRoll = randomInt(1, 6) + randomInt(1, 6)
+                temp = 0
+                for (const key in patron_boons[randomPatron]) {
+                    if (talentRoll >= temp && talentRoll <= key) { // talent keys are max of range
+                        talent = classInfo.talents[key]
+                        tempTalent = {
+                            ...talent
+                        }
+                        tempTalent.description = `Talent. ${talent.description}`
+                        character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+                        break
+                    } else {
+                        temp = key
+                    }
+                }
+                giantPulsatingTalentsHandler(tempTalent.type, 'targets' in tempTalent ? tempTalent[key].targets : null)
+            break
+        case "twoBoons":
+            var heading = document.createElement('p');
+            heading.className = "heading-small";
+            heading.textContent = "Choose between two boons.";
+            contentArea.appendChild(heading);
+            var div = document.createElement("div")
+            div.id = "twelve" + dialogNum
+            div.className = "twelve-choice"
+            var talent = {}
+            var tempTalent = {}
+            for (let i = 1; i <= 2; i++) {
+                var talentRoll = randomInt(1, 6) + randomInt(1, 6)
+                for (const key in patron_boons[character.patron]) {
+                    if (talentRoll >= temp && talentRoll <= key) { // talent keys are max of range
+                        talent = patron_boons[character.patron][key]
+                        tempTalent = {
+                            ...talent
+                        }
+                        tempTalent.description = `Boon. ${talent.description}`
+                        break
+                    } else {
+                        temp = key
+                    }
+                }
+                p = document.createElement('p');
+                p.textContent = tempTalent.description;
+                p.onclick = function() {
+                    character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+                    giantPulsatingTalentsHandler(tempTalent.type, 'targets' in tempTalent ? tempTalent.targets : null)
+                    heading.remove()
+                    div.remove()
+                    refreshTalentsBox()
+                }
+                div.appendChild(p);
+            }
+            contentArea.appendChild(div)
+            dialogNum++
+            break
+        case "witchLanguage":
+            character.languages.push("Diabolic")
+            character.languages.push("Primordial")
+            character.languages.push("Sylvan")
+            refreshLanguageBox()
+            break
+        case "witchIncrease":
+            addParagraph(contentArea, "You get a +2 increase to Charisma, or a +1 bonus on spellcasting checks.", "heading-small")
+            var div = document.createElement("div")
+            div.className = "stat-increase"
+            div.onclick = function() {
+                handleStatIncrease()
+            }
+            div.appendChild(createRadio("Charisma"))
+            div.appendChild(createRadio("Spellcasting Checks"))
+            contentArea.appendChild(div)
+            dialogNum++
+            refreshSpellsBox()
+            break
+        case "desertRiderIncrease":
+            addParagraph(contentArea, "You get a +2 increase to Strength or Dexterity, or a +1 bonus to melee attacks.", "heading-small")
+            var div = document.createElement("div")
+            div.className = "stat-increase"
+            div.onclick = function() {
+                handleStatIncrease()
+            }
+            div.appendChild(createRadio("Strength"))
+            div.appendChild(createRadio("Dexterity"))
+            div.appendChild(createRadio("Melee Attacks"))
+            contentArea.appendChild(div)
+            dialogNum++
+            refreshSpellsBox()
+            break
+        case "pitFighterIncrease":
+            addParagraph(contentArea, "You get a +2 increase to Strength or Constitution, or a +1 bonus to melee attacks.", "heading-small")
+            var div = document.createElement("div")
+            div.className = "stat-increase"
+            div.onclick = function() {
+                handleStatIncrease()
+            }
+            div.appendChild(createRadio("Strength"))
+            div.appendChild(createRadio("Constitution"))
+            div.appendChild(createRadio("Melee Attacks"))
+            contentArea.appendChild(div)
+            dialogNum++
+            refreshSpellsBox()
+            break
+        case "oneBlackLotus": // ONE black lotus, ah ah ah
+            var blackLotusRoll = randomInt(1, 12)
+            var tempTalent = {}
+            tempTalent = black_lotus[blackLotusRoll]
+            tempTalent.description = "Black Lotus Talent. " + tempTalent.description
+            character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+            giantPulsatingTalentsHandler(tempTalent.type, 'targets' in tempTalent ? tempTalent.targets : null)
+            refreshTalentsBox()
+            break
+        case "twoBlackLotus": // TWO black lotus, ah ah ah
+            var blackLotusRoll = 0
+            var tempTalent = {}
+            for (let i = 1; i <= 2; i++) {
+                blackLotusRoll = randomInt(2, 12)
+                tempTalent = black_lotus[blackLotusRoll]
+                tempTalent.description = "Black Lotus Talent. " + tempTalent.description
+                character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+                giantPulsatingTalentsHandler(tempTalent.type, 'targets' in tempTalent ? tempTalent.targets : null)
+            }
+            refreshTalentsBox()
+            break
+        case "additionalHD":
+            character.hpbonus += randomInt(1, 6)
+            refreshHPAC()
+            refreshHPACTable()
+            break
+        case "seaWolfIncrease":
+            addParagraph(contentArea, "You get a +2 increase to Strength or Constitution, or a +1 bonus to attacks.", "heading-small")
+            var div = document.createElement("div")
+            div.className = "stat-increase"
+            div.onclick = function() {
+                handleStatIncrease()
+            }
+            div.appendChild(createRadio("Strength"))
+            div.appendChild(createRadio("Constitution"))
+            div.appendChild(createRadio("Attacks"))
+            contentArea.appendChild(div)
+            dialogNum++
+            refreshSpellsBox()
+            break
+        case "stoneSkin":
+            character.acbonus += 2
+            break
+        case "bardLanguages":
+            addParagraph(contentArea, "You know four additional common languages and one rare language.", "heading-small")
+            const languageDiv4 = document.createElement("div")
+            languageDiv4.className = "dropdowns"
+            var common = ["Common", "Dwarvish", "Elvish", "Giant", "Goblin", "Merran", "Orcish", "Reptilian", "Sylvan", "Thanian"]
+            var rare = ["Celestial", "Diabolic", "Draconic", "Primordial"]
+            for (var i = 0; i < 4; i++) {
+                var wrapper = document.createElement("select")
+                wrapper.name = "addlLanguage"
+                wrapper.onchange = function() {
+                    refreshLanguageBox()
+                }
+                wrapper.innerHTML = "<option disabled selected value> -- select an option -- </option>"
+                for (var j = 0; j < common.length; j++) {
+                    if (!character.languages.includes(common[j])) {
+                        var option = document.createElement("option")
+                        option.value = common[j]
+                        option.innerHTML = common[j]
+                        wrapper.appendChild(option)
+                    }
+                }
+                languageDiv4.appendChild(wrapper)
+            }
+            var wrapper = document.createElement("select")
+            wrapper.name = "addlLanguage"
+            wrapper.onchange = function() {
+                refreshLanguageBox()
+            }
+            wrapper.innerHTML = "<option disabled selected value> -- select an option -- </option>"
+            for (var j = 0; j < rare.length; j++) {
+                if (!character.languages.includes(rare[j])) {
+                    var option = document.createElement("option")
+                    option.value = rare[j]
+                    option.innerHTML = rare[j]
+                    wrapper.appendChild(option)
+                }
+            }
+            languageDiv4.appendChild(wrapper)
+            contentArea.appendChild(languageDiv4)
+            break
+        case "chooseTalent":
+            var heading = document.createElement('p');
+            heading.className = "heading-small";
+            heading.textContent = "You get a talent of your choice.";
+            contentArea.appendChild(heading);
+            var div = document.createElement("div")
+            div.id = "twelve" + dialogNum
+            div.className = "twelve-choice"
+            var tempTalent = {}
+            for (const key in classInfo.talents) {
+                if (key == 12) {
+                    break
+                }
+                p = document.createElement('p');
+                p.textContent = classInfo.talents[key].description;
+                p.onclick = function() {
+                    tempTalent = {
+                        ...classInfo.talents[key]
+                    }
+                    tempTalent.description = "Talent. " + tempTalent.description
+                    character.talentsSkills[Object.keys(character.talentsSkills).length + 1] = tempTalent
+                    giantPulsatingTalentsHandler(classInfo.talents[key].type, 'targets' in classInfo.talents[key] ? classInfo.talents[key].targets : null)
+                    heading.remove()
+                    div.remove()
+                    refreshTalentsBox()
+                }
+                div.appendChild(p);
+            }
+            contentArea.appendChild(div)
+            dialogNum++
+            break
+        case "namedBlade":
+            character.items.push("+0 sword, choice")
+            break
     }
 }
 
-function handleStatIncrease() {
+function handleStatIncrease(bonus) {
     character.strbonus = 0
     character.dexbonus = 0
     character.conbonus = 0
@@ -519,6 +902,12 @@ function handleStatIncrease() {
                     case "Spellcasting Checks":
                         character.spellcasting += 1
                         break
+                    case "Melee Damage":
+                        break
+                    case "Melee Attacks":
+                        break
+                    case "Attacks":
+                        break
                 }
             }
         }
@@ -535,7 +924,7 @@ function generateSpellSelector() {
     table.className = "spells-table"
     table.id = "spellsTable"
     for (const key in spells) {
-        if (spells[key].class.includes(character.class)) {
+        if (spells[key].class.includes(character.class) && (spells[key].alignment.includes(character.alignment) || spells[key].alignment.length == 0)) {
             const tr = document.createElement("tr")
 
             const tdCheck = document.createElement("td")
@@ -718,11 +1107,457 @@ function handleWeaponSelection(value) {
     refreshGearBox()
 }
 
-const backgrounds = ["Urchin", "Wanted", "Cult Initiate", "Thieves' Guild", "Banished", "Orphaned", "Wizard's Apprentice", "Jeweler", "Herbalist", "Barbarian", "Mercenary", "Sailor", "Acolyte", "Soldier", "Ranger", "Scout", "Minstrel", "Scholar", "Noble", "Chirurgeon"]
-const raceArray = ["Dwarf", "Elf", "Goblin", "Half-Orc", "Halfling", "Human"]
-const races = {
+function handleContentInjectors() {
+    classArray = [];
+    classes = {};
+    spells = {
+        1: {
+            name: "Alarm",
+            class: ["Wizard"],
+            alignment: [],
+            duration: "1 day",
+            range: "Close",
+            description: "You touch one object, such as a door threshold, setting a magical alarm on it. If any creature you do not designate while casting the spell touches or crosses past the object, a magical bell sounds in your head."
+        },
+        2: {
+            name: "Burning Hands",
+            class: ["Wizard"],
+            alignment: [],
+            duration: "Instant",
+            range: "Close",
+            description: "You spread your fingers with thumbs touching, unleashing a circle of flame that fills a close area around where you stand. Creatures within the area of effect take 1d6 damage. Unattended flammable objects ignite."
+        },
+        3: {
+            name: "Charm Person",
+            class: ["Wizard"],
+            alignment: [],
+            duration: "1d8 days",
+            range: "Near",
+            description: "You magically beguile one humanoid of level 2 or less within near range, who regards you as a friend for the duration. The spell ends if you or your allies do anything to hurt it that it notices. The target knows you magically enchanted it after the spell ends."
+        },
+        4: {
+            name: "Cure Wounds",
+            class: ["Priest"],
+            alignment: [],
+            duration: "Instant",
+            range: "Close",
+            description: "Your touch restores ebbing life. Roll a number of d6s equal to 1 + half your level (rounded down). One target you touch regains that many hit points."
+        },
+        5: {
+            name: "Detect Magic",
+            class: ["Wizard"],
+            alignment: [],
+            duration: "Focus",
+            range: "Near",
+            description: "You can sense the presence of magic within near range for the spell's duration. If you focus for two rounds, you discern its general properties. Full barriers block this spell."
+        },
+        6: {
+            name: "Feather Fall",
+            class: ["Wizard"],
+            alignment: [],
+            duration: "Instant",
+            range: "Self",
+            description: "You may make an attempt to cast this spell when you fall. Your rate of descent slows so that you land safely on your feet."
+        },
+        7: {
+            name: "Floating Disk",
+            class: ["Wizard"],
+            alignment: [],
+            duration: "10 rounds",
+            range: "Near",
+            description: "You create a floating, circular disk of force with a concave center. It can carry up to 20 gear slots. It hovers at waist level and automatically stays within near of you. It can't cross over drop-offs or pits taller than a human."
+        },
+        8: {
+            name: "Hold Portal",
+            class: ["Wizard"],
+            alignment: [],
+            duration: "10 rounds",
+            range: "Near",
+            description: "You magically hold a portal closed for the duration. A creature must make a successful STR check vs. your spellcasting check to open the portal. The knock spell ends this spell."
+        },
+        9: {
+            name: "Holy Weapon",
+            class: ["Priest"],
+            alignment: [],
+            duration: "5 rounds",
+            range: "Close",
+            description: "One weapon you touch is imbued with a sacred blessing. The weapon becomes magical and has +1 to attack and damage rolls for the duration."
+        },
+        10: {
+            name: "Light",
+            class: ["Priest", "Wizard"],
+            alignment: [],
+            duration: "1 hour real time",
+            range: "Close",
+            description: "One object you touch glows with bright, heatless light, illuminating out to a near distance for 1 hour of real time."
+        },
+        11: {
+            name: "Mage Armor",
+            class: ["Wizard"],
+            alignment: [],
+            duration: "10 rounds",
+            range: "Self",
+            description: "An invisible layer of magical force protects your vitals. Your armor class becomes 14 (18 on a critical spellcasting check) for the spell's duration."
+        },
+        12: {
+            name: "Magic Missile",
+            class: ["Wizard"],
+            alignment: [],
+            duration: "Instant",
+            range: "Far",
+            description: "You have advantage on your check to cast this spell. A glowing bolt of force streaks from your open hand, dealing 1d4 damage to one target."
+        },
+        13: {
+            name: "Protection from Evil",
+            class: ["Priest", "Wizard"],
+            alignment: [],
+            duration: "Focus",
+            range: "Close",
+            description: "For the spell's duration, chaotic beings have disadvantage on attack rolls and hostile spellcasting checks against the target. These beings also can't possess, compel, or beguile it. When cast on an already-possessed target, the possessing entity makes a CHA check vs. your last spellcasting check. On a failure, the entity is expelled."
+        },
+        14: {
+            name: "Shield of Faith",
+            class: ["Priest"],
+            alignment: [],
+            duration: "5 rounds",
+            range: "Self",
+            description: "A protective force wrought of your holy conviction surrounds you. You gain a +2 bonus to your armor class for the duration."
+        },
+        15: {
+            name: "Sleep",
+            class: ["Wizard"],
+            alignment: [],
+            duration: "Instant",
+            range: "Near",
+            description: "You weave a lulling spell that fills a near-sized cube extending from you. Living creatures in the area of effect fall into a deep sleep if they are LV 2 or less. Vigorous shaking or being injured wakes them."
+        }
+    };
+    backgrounds = ["Urchin", "Wanted", "Cult Initiate", "Thieves' Guild", "Banished", "Orphaned", "Wizard's Apprentice", "Jeweler", "Herbalist", "Barbarian", "Mercenary", "Sailor", "Acolyte", "Soldier", "Ranger", "Scout", "Minstrel", "Scholar", "Noble", "Chirurgeon"];
+    weapons = {
+        1: {
+            name: "Bastard sword",
+            type: "M",
+            range: "C",
+            damage: "1d8/1d10",
+            properties: ["V", "2 slots"]
+        },
+        2: {
+            name: "Club",
+            type: "M",
+            range: "C",
+            damage: "1d4",
+            properties: [""]
+        },
+        3: {
+            name: "Crossbow",
+            type: "R",
+            range: "F",
+            damage: "1d6",
+            properties: ["2H", "L"]
+        },
+        4: {
+            name: "Dagger",
+            type: "M/R",
+            range: "C/N",
+            damage: "1d4",
+            properties: ["F", "Th"]
+        },
+        5: {
+            name: "Greataxe",
+            type: "M",
+            range: "C",
+            damage: "1d8/1d10",
+            properties: ["V", "2 slots"]
+        },
+        6: {
+            name: "Greatsword",
+            type: "M",
+            range: "C",
+            damage: "1d12",
+            properties: ["2H", "2 slots"]
+        },
+        7: {
+            name: "Javelin",
+            type: "M/R",
+            range: "C/F",
+            damage: "1d4",
+            properties: ["Th"]
+        },
+        8: {
+            name: "Longbow",
+            type: "R",
+            range: "F",
+            damage: "1d8",
+            properties: ["2H"]
+        },
+        9: {
+            name: "Longsword",
+            type: "M",
+            range: "C",
+            damage: "1d8",
+            properties: [""]
+        },
+        10: {
+            name: "Mace",
+            type: "M",
+            range: "C",
+            damage: "1d6",
+            properties: [""]
+        },
+        11: {
+            name: "Shortbow",
+            type: "R",
+            range: "F",
+            damage: "1d4",
+            properties: ["2H"]
+        },
+        12: {
+            name: "Shortsword",
+            type: "M",
+            range: "C",
+            damage: "1d6",
+            properties: [""]
+        },
+        13: {
+            name: "Spear",
+            type: "M/R",
+            range: "C/N",
+            damage: "1d6",
+            properties: ["Th"]
+        },
+        14: {
+            name: "Staff",
+            type: "M",
+            range: "C",
+            damage: "1d4",
+            properties: ["2H"]
+        },
+        15: {
+            name: "Warhammer",
+            type: "M",
+            range: "C",
+            damage: "1d10",
+            properties: ["2H"]
+        }
+    };
+    let anyInjector = false;
+    for (var i = 1; i <= 7; i++) { // number of injectors is hardcoded
+        const injector = document.getElementById("injector" + i)
+        if (injector != null) {
+            if (injector.checked) {
+                anyInjector = true;
+                inject(injector.value)
+            }
+        }
+    }
+    if (!anyInjector) {
+        inject("Core")
+    }
+}
+
+function inject(source) {
+    let i = 1
+
+    for (const class_key in grimoire_classes[source]) {
+        classes[class_key] = grimoire_classes[source][class_key]
+        classArray.push(grimoire_classes[source][class_key].name)
+    }
+
+    i = Object.keys(spells).length
+
+    for (const spell_key in grimoire_spells[source]) {
+        spells[i] = grimoire_spells[source][spell_key]
+        i++
+    }
+
+    for (const background of grimoire_backgrounds[source]) {
+        backgrounds.push(background)
+    }
+
+    i = Object.keys(weapons).length
+
+    for (const weapon_key in grimoire_weapons[source]) {
+        weapons[i] = grimoire_weapons[source][weapon_key]
+        i++
+    }
+}
+
+const { jsPDF } = window.jspdf;
+
+function makePDF() {
+    const doc = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4"
+    });
+
+    const img = new Image();
+    img.src = "sheet.png";
+
+    img.onload = function () {
+        // background
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+
+        doc.addImage(img, "PNG", 0, 0, pageWidth, pageHeight);
+
+        // text
+        doc.setFontSize(adjustFontSize(character.name));
+        doc.text(character.name, 105, 31);
+
+        doc.setFontSize(adjustFontSize(character.race));
+        doc.text(character.race, 91, 54.5);
+
+        doc.setFontSize(adjustFontSize(character.class));
+        doc.text(character.class, 91, 78);
+
+        doc.setFontSize(adjustFontSize(18));
+        doc.text("1", 97.5, 101);
+
+        // doc.setFontSize(adjustFontSize(18));
+        // doc.text("0", 125, 98);
+
+        doc.setFontSize(adjustFontSize(18));
+        doc.text("10", 146, 98);
+
+        doc.setFontSize(adjustFontSize(character.title));
+        doc.text(character.title, 91, 124);
+
+        doc.setFontSize(adjustFontSize(character.alignment));
+        doc.text(character.alignment, 91, 148);
+
+        doc.setFontSize(adjustFontSize(character.background));
+        doc.text(character.background, 91, 171.5);
+
+        doc.setFontSize(16);
+        doc.text(character.deity, 91, 195);
+
+        doc.setFontSize(18);
+        doc.text((character.str).toString(), 17, 52);
+
+        doc.setFontSize(18);
+        doc.text(((findModifier(character.str, character.strbonus) >= 0 ? "+" : "") + findModifier(character.str, character.strbonus).toString()), 34, 52);
+
+        doc.setFontSize(18);
+        doc.text((character.int).toString(), 54, 52);
+
+        doc.setFontSize(18);
+        doc.text(((findModifier(character.int, character.intbonus) >= 0 ? "+" : "") + findModifier(character.int, character.intbonus).toString()), 71, 52);
+
+        doc.setFontSize(18);
+        doc.text((character.dex).toString(), 17, 77);
+
+        doc.setFontSize(18);
+        doc.text(((findModifier(character.dex, character.dexbonus) >= 0 ? "+" : "") + findModifier(character.dex, character.dexbonus).toString()), 34, 77);
+
+        doc.setFontSize(18);
+        doc.text((character.wis).toString(), 54, 77);
+
+        doc.setFontSize(18);
+        doc.text(((findModifier(character.wis, character.wisbonus) >= 0 ? "+" : "") + findModifier(character.wis, character.wisbonus).toString()), 71, 77);
+
+        doc.setFontSize(18);
+        doc.text((character.con).toString(), 17, 102);
+
+        doc.setFontSize(18);
+        doc.text(((findModifier(character.con, character.conbonus) >= 0 ? "+" : "") + findModifier(character.con, character.conbonus).toString()), 34, 102);
+
+        doc.setFontSize(18);
+        doc.text((character.cha).toString(), 54, 102);
+
+        doc.setFontSize(18);
+        doc.text(((findModifier(character.cha, character.chabonus) >= 0 ? "+" : "") + findModifier(character.cha, character.chabonus).toString()), 71, 102);
+
+        doc.setFontSize(32);
+        doc.text((character.hp + character.hpbonus).toString(), 25, 134)
+
+        doc.setFontSize(32);
+        doc.text((character.ac + character.acbonus).toString(), 60, 134)
+
+        let y = 32
+        let x = 170
+
+        doc.setFontSize(14)
+        for (const talent_key in character.talentsSkills) {
+            let desc = character.talentsSkills[talent_key].description
+            let header = desc.split(".", 1)[0]
+            if (header.includes("Talent") || header.includes("Boon")) {
+                let currLine = ""
+                let len = 0
+                x = 170
+                for (let i = 0; i < desc.length; i++) {
+                    len++
+                    currLine += desc[i]
+                    if (desc[i] == " " && len > 44) {
+                        doc.text(currLine, x, y)
+                        y += 6
+                        currLine = ""
+                        x = 174
+                        len = 0
+                    }
+                    if (i == desc.length - 1) {
+                        doc.text(currLine, x, y)
+                        currLine = ""
+                        len = 0
+                    }
+                }
+            } else {
+                doc.text(header + ".", 170, y)
+            }
+            y += 8
+        }
+
+        for (const spell_key in character.spells) {
+            doc.text(character.spells[spell_key].name + ".", 170, y)
+            y += 8
+        }
+
+        doc.setFontSize(12)
+
+        y = 126.25
+        let y2 = 133
+        let twoSlots = ["Bastard sword", "Greataxe", "Greatsword"]
+        let threeSlots = ["Lance"]
+
+        for (let i = 0; i < character.items.length; i++) {
+            if (character.items[i].includes("free to carry")) {
+                doc.text(character.items[i].split("(", 1)[0], 253, y2)
+                y2 += 6
+            } else {
+                doc.text(character.items[i], 176, y)
+                y += 6.75
+                if (twoSlots.includes(character.items[i])) {
+                    doc.text('"', 176, y)
+                    y += 6.75
+                } else if (threeSlots.includes(character.items[i])) {
+                    for (let j = 0; j <= 1; j++) {
+                        doc.text('"', 176, y)
+                        y += 6.75
+                    }
+                }
+            }
+        }
+
+        // save
+        doc.save(character.name + ".pdf");
+    };
+}
+
+function adjustFontSize(text) {
+    let fontSize = 16;
+
+    if (text.length > 18) {
+        fontSize -= (text.length - 16);
+    };
+
+    return (fontSize < 6) ? 6 : fontSize;
+}
+
+var backgrounds = []
+var raceArray = ["Dwarf", "Elf", "Goblin", "Half-Orc", "Halfling", "Human"]
+var races = {
     dwarf: {
-        names: ['Thordrim Stonebjirn', 'Dallin Alemonger', 'Jak Hammerhand', 'Halgrom Blackrock', 'Krag Silvervein', 'Cil Marblebreaker', 'Toradin Ironhouse', 'Gorim Pickaxe', 'Phlagon Axehand', 'Axebrom Rocksmasher', 'Frauline Bronzehand', 'Hillda Grogbeard', 'Gemma Goldflint', 'Brakkia Shatterstone', 'Tharia Silverhelm', 'Sarai Marblefist', 'Danika Stonehand', 'Wynn Orebelly', 'Langhilda Maceface', 'Tilda Stonebrew', 'Thorack Caskraider', 'Jevil Brownrocks', 'Sigrun Fellhammer', 'Crunkle Iceheart', 'Tyr Wraithbane', 'Ivan Killhammer', 'Casker Hardhand', 'Ulgrim Ironheart', 'Zalgrom Braveaxe', 'Jax Firebeard', 'Jessa Baneshield', 'Kelja Marblehand', 'Pamika Lavabrow', 'Sapphire Hammerheart', 'Doria Icebeard', 'Branika Downbrew', 'Morrigan Emberstone', 'Ember Stonehelm', 'Icelle Rockbane', 'Brianna Grogfiend', 'Axel Blackstone', 'Tharrik Bronzebeard', 'Erik Silverchain', 'Hargraves Brownmead', 'Maddox Hammerfell', 'Grimbar Meadstone', 'Aldrim Fireheart', 'Norvig Shieldbjirn', 'Valbjorn Brewjaw', 'Valgrim Blackheart', 'Freya Battleborn', 'Helga Firebrew', 'Halga Silverbane', 'Klara Goldstone', 'Maggi Stonebrow', 'Hikara Stormborn', 'Erinalda Icebane', 'Krohilda Silverheart', 'Belynn Oremonger', 'Opal Goldheart', 'Zakk Ironspike u/Wabutan', 'Merrik Bourbontoe', 'Billick Stormbrew', 'Hark Iceborn', 'Zalgrim Hardheart', 'Todric Brewheart', 'Goregrim Alebeard', 'Aldvar Beardbane', 'Fredrik Rockhard', 'Ferric Emberfell', 'Hilda Firemane', 'Kaja Lavafiend', 'Ruby Braveheart', 'Saria Bloodhelm', 'Erinia Grogfist', 'Allivia Stormbeard', 'Vera Goldhand', 'Maddi Silverbjirn', 'Madilyn Iceshield', 'Merrilyn Firebane', 'Grim Blackiron', 'Reinhardt Fellbeard', 'Grom Chainbeard', 'Karl Firestone', 'Wolfrim Shattershield', 'Ribert Goldmonger', 'Dak Rockmine', 'Olvik Thunderaxe', 'Brim Icefist', 'Korgrim Stoneshield', 'Roberta Lightborn', 'Berta Axefiend', 'Carla Hammerstrike', 'Katja Wraithheart', 'Ostara Marblebrew', 'Gertrude Killbrew', 'Ida Beermaker', 'Kirra Anvilbreaker', 'Jozelyn Strongshield', 'Gisli Onyxhammer'],
+        names: ['Thordrim Stonebjirn', 'Dallin Alemonger', 'Jak Hammerhand', 'Halgrom Blackrock', 'Krag Silvervein', 'Cil Marblebreaker', 'Toradin Ironhouse', 'Gorim Pickaxe', 'Phlagon Axehand', 'Axebrom Rocksmasher', 'Frauline Bronzehand', 'Hillda Grogbeard', 'Gemma Goldflint', 'Brakkia Shatterstone', 'Tharia Silverhelm', 'Sarai Marblefist', 'Danika Stonehand', 'Wynn Orebelly', 'Langhilda Maceface', 'Tilda Stonebrew', 'Thorack Caskraider', 'Jevil Brownrocks', 'Sigrun Fellhammer', 'Crunkle Iceheart', 'Tyr Wraithbane', 'Ivan Killhammer', 'Casker Hardhand', 'Ulgrim Ironheart', 'Zalgrom Braveaxe', 'Jax Firebeard', 'Jessa Baneshield', 'Kelja Marblehand', 'Pamika Lavabrow', 'Sapphire Hammerheart', 'Doria Icebeard', 'Branika Downbrew', 'Morrigan Emberstone', 'Ember Stonehelm', 'Icelle Rockbane', 'Brianna Grogfiend', 'Axel Blackstone', 'Tharrik Bronzebeard', 'Erik Silverchain', 'Hargraves Brownmead', 'Maddox Hammerfell', 'Grimbar Meadstone', 'Aldrim Fireheart', 'Norvig Shieldbjirn', 'Valbjorn Brewjaw', 'Valgrim Blackheart', 'Freya Battleborn', 'Helga Firebrew', 'Halga Silverbane', 'Klara Goldstone', 'Maggi Stonebrow', 'Hikara Stormborn', 'Erinalda Icebane', 'Krohilda Silverheart', 'Belynn Oremonger', 'Opal Goldheart', 'Zakk Ironspike', 'Merrik Bourbontoe', 'Billick Stormbrew', 'Hark Iceborn', 'Zalgrim Hardheart', 'Todric Brewheart', 'Goregrim Alebeard', 'Aldvar Beardbane', 'Fredrik Rockhard', 'Ferric Emberfell', 'Hilda Firemane', 'Kaja Lavafiend', 'Ruby Braveheart', 'Saria Bloodhelm', 'Erinia Grogfist', 'Allivia Stormbeard', 'Vera Goldhand', 'Maddi Silverbjirn', 'Madilyn Iceshield', 'Merrilyn Firebane', 'Grim Blackiron', 'Reinhardt Fellbeard', 'Grom Chainbeard', 'Karl Firestone', 'Wolfrim Shattershield', 'Ribert Goldmonger', 'Dak Rockmine', 'Olvik Thunderaxe', 'Brim Icefist', 'Korgrim Stoneshield', 'Roberta Lightborn', 'Berta Axefiend', 'Carla Hammerstrike', 'Katja Wraithheart', 'Ostara Marblebrew', 'Gertrude Killbrew', 'Ida Beermaker', 'Kirra Anvilbreaker', 'Jozelyn Strongshield', 'Gisli Onyxhammer'],
         languages: ["Common", "Dwarvish"],
         skill: {
             type: "text",
@@ -770,154 +1605,9 @@ const races = {
         }
     }
 }
-const classArray = ["Fighter", "Priest", "Thief", "Wizard"]
-const classes = {
-    fighter: {
-        weapons: "All weapons",
-        armor: "All armor and shields",
-        hd: 8,
-        misc: ["Hauler. Add your Constitution modifier, if positive, to your gear slots.", "Weapon Mastery. Choose one type of weapon, such as longswords. You gain +1 to attack and damage with that weapon type. In addition, add half your level to these rolls (round down).", "Grit. Choose Strength or Dexterity. You have advantage on checks of that type to overcome an opposing force, such as kicking open a stuck door (Strength) or slipping free of rusty chains (Dexterity)."],
-        talents: {
-            2: {
-                type: "text",
-                description: "Gain Weapon Mastery with one additional weapon type."
-            },
-            6: {
-                type: "text",
-                description: "+1 to melee and ranged attacks."
-            },
-            9: {
-                type: "statIncrease",
-                description: "+2 to Strength, Dexterity, or Constitution stat.",
-                targets: ["Strength", "Dexterity", "Constitution"]
-            },
-            11: {
-                type: "text",
-                description: "Choose one kind of armor. You get +1 AC from that armor."
-            },
-            12: {
-                type: "twelve",
-                description: "Choose a talent or +2 points to distribute to stats."
-            }
-        },
-        titles: {
-            "Lawful": "Squire",
-            "Chaotic": "Knave",
-            "Neutral": "Warrior"
-        },
-        spells: 0,
-        items: []
-    },
-    priest: {
-        weapons: "Club, crossbow, dagger, mace, longsword, staff, warhammer",
-        armor: "All armor and shields",
-        hd: 6,
-        misc: ["Languages. You know Celestial, Diabolic, or Primordial.", "Turn Undead. You know the turn undead spell. It doesn't count toward your number of known spells.", "Deity. Choose a god to serve who matches your alignment (see Deities, pg. 28). You have a holy symbol for your god (it takes up no gear slots).", "Spellcasting. You can cast priest spells you know."],
-        talents: {
-            2: {
-                type: "text",
-                description: "Gain advantage on casting one spell you know."
-            },
-            6: {
-                type: "text",
-                description: "+1 to melee or ranged attacks."
-            },
-            9: {
-                type: "spellcasting",
-                description: "+1 to priest spellcasting checks."
-            },
-            11: {
-                type: "statIncrease",
-                description: "+2 to Strength or Wisdom stat.",
-                targets: ["Strength", "Wisdom"]
-            },
-            12: {
-                type: "twelve",
-                description: "Choose a talent or +2 points to distribute to stats."
-            }
-        },
-        titles: {
-            "Lawful": "Acolyte",
-            "Chaotic": "Initiate",
-            "Neutral": "Seeker"
-        },
-        spells: 2,
-        items: ["Holy Symbol (free to carry)"]
-    },
-    thief: {
-        weapons: "Club, crossbow, dagger, shortbow, shortsword",
-        armor: "Leather armor, mithral chainmail",
-        hd: 4,
-        misc: ["Backstab. If you hit a creature who is unaware of your attack, you deal an extra weapon die of damage. Add additional weapon dice of damage equal to half your level (round down).", "Thievery. You are adept at thieving skills and have the necessary tools of the trade secreted on your person (they take up no gear slots). You are trained in the following tasks and have advantage on any associated checks made for climbing, sneaking and hiding, applying disguises, finding and disabling traps, and delicate tasks such as picking pockets and opening locks."],
-        talents: {
-            2: {
-                type: "text",
-                description: "Gain advantage on initiative rolls."
-            },
-            5: {
-                type: "text",
-                description: "Your Backstab deals +1 dice of damage."
-            },
-            9: {
-                type: "statIncrease",
-                description: "+2 to Strength, Dexterity, or Charisma stat.",
-                targets: ["Strength", "Dexterity", "Charisma"]
-            },
-            11: {
-                type: "text",
-                description: "+1 to melee and ranged attacks."
-            },
-            12: {
-                type: "twelve",
-                description: "Choose a talent or +2 points to distribute to stats."
-            }
-        },
-        titles: {
-            "Lawful": "Footpad",
-            "Chaotic": "Thug",
-            "Neutral": "Robber"
-        },
-        spells: 0,
-        items: ["Thief Tools (free to carry)"]
-    },
-    wizard: {
-        weapons: "Dagger, staff",
-        armor: "None",
-        hd: 4,
-        misc: ["Languages. You know two additional common languages and two rare languages.", "Learning Spells. You can permanently learn a wizard spell from a spell scroll by studying it for a day and succeeding on a DC 15 Intelligence check. Whether you succeed or fail, you expend the spell scroll. Spells you learn in this way don't count toward your known spells.", "Spellcasting. You can cast wizard spells you know. You know three tier 1 spells of your choice from the wizard spell list. Each time you gain a level, you choose new wizard spells to learn according to the Wizard Spells Known table."],
-        talents: {
-            2: {
-                type: "wizardItem",
-                description: "Make 1 random magic item of a type you choose."
-            },
-            7: {
-                type: "wizardIncrease",
-                description: "+2 to Intelligence stat or +1 to wizard spellcasting checks."
-            },
-            9: {
-                type: "text",
-                description: "Gain advantage on casting one spell you know."
-            },
-            11: {
-                type: "spellSlot",
-                description: "Learn one additional wizard spell of any tier you know.",
-                amount: 1,
-                types: ["Wizard"]
-            },
-            12: {
-                type: "twelve",
-                description: "Choose a talent or +2 points to distribute to stats."
-            }
-        },
-        titles: {
-            "Lawful": "Apprentice",
-            "Chaotic": "Adept",
-            "Neutral": "Shaman"
-        },
-        spells: 3,
-        items: []
-    }
-};
+var classArray = [];
+var classes = {};
+
 const deities = [
     ["Saint Terragnis", "Lawful"],
     ["Gede", "Neutral"],
@@ -928,225 +1618,14 @@ const deities = [
     ["Shune the Vile", "Chaotic"],
 ]
 
-const spells = {
-    1: {
-        name: "Alarm",
-        class: ["Wizard"],
-        duration: "1 day",
-        range: "Close",
-        description: "You touch one object, such as a door threshold, setting a magical alarm on it. If any creature you do not designate while casting the spell touches or crosses past the object, a magical bell sounds in your head."
-    },
-    2: {
-        name: "Burning Hands",
-        class: ["Wizard"],
-        duration: "Instant",
-        range: "Close",
-        description: "You spread your fingers with thumbs touching, unleashing a circle of flame that fills a close area around where you stand. Creatures within the area of effect take 1d6 damage. Unattended flammable objects ignite."
-    },
-    3: {
-        name: "Charm Person",
-        class: ["Wizard"],
-        duration: "1d8 days",
-        range: "Near",
-        description: "You magically beguile one humanoid of level 2 or less within near range, who regards you as a friend for the duration. The spell ends if you or your allies do anything to hurt it that it notices. The target knows you magically enchanted it after the spell ends."
-    },
-    4: {
-        name: "Cure Wounds",
-        class: ["Priest"],
-        duration: "Instant",
-        range: "Close",
-        description: "Your touch restores ebbing life. Roll a number of d6s equal to 1 + half your level (rounded down). One target you touch regains that many hit points."
-    },
-    5: {
-        name: "Detect Magic",
-        class: ["Wizard"],
-        duration: "Focus",
-        range: "Near",
-        description: "You can sense the presence of magic within near range for the spell's duration. If you focus for two rounds, you discern its general properties. Full barriers block this spell."
-    },
-    6: {
-        name: "Feather Fall",
-        class: ["Wizard"],
-        duration: "Instant",
-        range: "Self",
-        description: "You may make an attempt to cast this spell when you fall. Your rate of descent slows so that you land safely on your feet."
-    },
-    7: {
-        name: "Floating Disk",
-        class: ["Wizard"],
-        duration: "10 rounds",
-        range: "Near",
-        description: "You create a floating, circular disk of force with a concave center. It can carry up to 20 gear slots. It hovers at waist level and automatically stays within near of you. It can't cross over drop-offs or pits taller than a human."
-    },
-    8: {
-        name: "Hold Portal",
-        class: ["Wizard"],
-        duration: "10 rounds",
-        range: "Near",
-        description: "You magically hold a portal closed for the duration. A creature must make a successful STR check vs. your spellcasting check to open the portal. The knock spell ends this spell."
-    },
-    9: {
-        name: "Holy Weapon",
-        class: ["Priest"],
-        duration: "5 rounds",
-        range: "Close",
-        description: "One weapon you touch is imbued with a sacred blessing. The weapon becomes magical and has +1 to attack and damage rolls for the duration."
-    },
-    10: {
-        name: "Light",
-        class: ["Priest", "Wizard"],
-        duration: "1 hour real time",
-        range: "Close",
-        description: "One object you touch glows with bright, heatless light, illuminating out to a near distance for 1 hour of real time."
-    },
-    11: {
-        name: "Mage Armor",
-        class: ["Wizard"],
-        duration: "10 rounds",
-        range: "Self",
-        description: "An invisible layer of magical force protects your vitals. Your armor class becomes 14 (18 on a critical spellcasting check) for the spell's duration."
-    },
-    12: {
-        name: "Magic Missile",
-        class: ["Wizard"],
-        duration: "Instant",
-        range: "Far",
-        description: "You have advantage on your check to cast this spell. A glowing bolt of force streaks from your open hand, dealing 1d4 damage to one target."
-    },
-    13: {
-        name: "Protection from Evil",
-        class: ["Priest", "Wizard"],
-        duration: "Focus",
-        range: "Close",
-        description: "For the spell's duration, chaotic beings have disadvantage on attack rolls and hostile spellcasting checks against the target. These beings also can't possess, compel, or beguile it. When cast on an already-possessed target, the possessing entity makes a CHA check vs. your last spellcasting check. On a failure, the entity is expelled."
-    },
-    14: {
-        name: "Shield of Faith",
-        class: ["Priest"],
-        duration: "5 rounds",
-        range: "Self",
-        description: "A protective force wrought of your holy conviction surrounds you. You gain a +2 bonus to your armor class for the duration."
-    },
-    15: {
-        name: "Sleep",
-        class: ["Wizard"],
-        duration: "Instant",
-        range: "Near",
-        description: "You weave a lulling spell that fills a near-sized cube extending from you. Living creatures in the area of effect fall into a deep sleep if they are LV 2 or less. Vigorous shaking or being injured wakes them."
-    }
-};
+var spells = {};
 
-const weapons = {
-    1: {
-        name: "Bastard sword",
-        type: "M",
-        range: "C",
-        damage: "1d8/1d10",
-        properties: ["V", "2 slots"]
-    },
-    2: {
-        name: "Club",
-        type: "M",
-        range: "C",
-        damage: "1d4",
-        properties: [""]
-    },
-    3: {
-        name: "Crossbow",
-        type: "R",
-        range: "F",
-        damage: "1d6",
-        properties: ["2H", "L"]
-    },
-    4: {
-        name: "Dagger",
-        type: "M/R",
-        range: "C/N",
-        damage: "1d4",
-        properties: ["F", "Th"]
-    },
-    5: {
-        name: "Greataxe",
-        type: "M",
-        range: "C",
-        damage: "1d8/1d10",
-        properties: ["V", "2 slots"]
-    },
-    6: {
-        name: "Greatsword",
-        type: "M",
-        range: "C",
-        damage: "1d12",
-        properties: ["2H", "2 slots"]
-    },
-    7: {
-        name: "Javelin",
-        type: "M/R",
-        range: "C/F",
-        damage: "1d4",
-        properties: ["Th"]
-    },
-    8: {
-        name: "Longbow",
-        type: "R",
-        range: "F",
-        damage: "1d8",
-        properties: ["2H"]
-    },
-    9: {
-        name: "Longsword",
-        type: "M",
-        range: "C",
-        damage: "1d8",
-        properties: [""]
-    },
-    10: {
-        name: "Mace",
-        type: "M",
-        range: "C",
-        damage: "1d6",
-        properties: [""]
-    },
-    11: {
-        name: "Shortbow",
-        type: "R",
-        range: "F",
-        damage: "1d4",
-        properties: ["2H"]
-    },
-    12: {
-        name: "Shortsword",
-        type: "M",
-        range: "C",
-        damage: "1d6",
-        properties: [""]
-    },
-    13: {
-        name: "Spear",
-        type: "M/R",
-        range: "C/N",
-        damage: "1d6",
-        properties: ["Th"]
-    },
-    14: {
-        name: "Staff",
-        type: "M",
-        range: "C",
-        damage: "1d4",
-        properties: ["2H"]
-    },
-    15: {
-        name: "Warhammer",
-        type: "M",
-        range: "C",
-        damage: "1d10",
-        properties: ["2H"]
-    }
-};
+var weapons = {};
 
 const gear = ["Torch", "Dagger", "Pole", "Rations (3)", "Rope, 60'", "Oil, flask", "Crowbar", "Iron spikes (10)", "Flint and steel", "Grappling hook", "Shield", "Caltrops (one bag)"]
 
 let character = null
+let raceInfo = null
 let classInfo = null
 
 let dialogNum = 1
@@ -1158,10 +1637,29 @@ window.mobileCheck = function() {
 }; // courtesy of detectmobilebrowsers.com
 
 window.addEventListener('DOMContentLoaded', function() {
-    contentArea = document.getElementById("contentArea")
+    var injectorsCollapsible = document.getElementById("injectors_collapsible");
+
+    injectorsCollapsible.addEventListener("click", function() {
+        injectorsCollapsible.classList.toggle("active");
+        var injectors = injectorsCollapsible.nextElementSibling;
+        if (injectors.style.display === "block") {
+            injectors.style.display = "none";
+        } else {
+            injectors.style.display = "block";
+        }
+    })
+
+    var printButton = document.getElementById("print_button");
+
+    printButton.addEventListener("click", function() {
+        makePDF()
+    })
+    
+    var contentArea = document.getElementById("contentArea")
 
     genButton = document.getElementById("genButton")
     genButton.onclick = function() {
+        printButton.style.display = "block";
         character = {
             name: "",
             race: "",
@@ -1186,13 +1684,19 @@ window.addEventListener('DOMContentLoaded', function() {
             spellcasting: 0,
             initialHPRoll: 0,
             hp: 0,
+            hpbonus: 0,
             ac: 0,
+            acbonus: 0,
             gp: 0,
             talentsSkills: {},
             items: [],
             spellSlots: 0,
-            spells: {}
+            spells: {},
+            patron: ""
         }
+        
+        handleContentInjectors()
+
         raceInfo = null
         classInfo = null
         character.race = choice(raceArray)
@@ -1218,7 +1722,83 @@ window.addEventListener('DOMContentLoaded', function() {
         }
         character.name = choice(raceInfo.names)
         character.languages = [...raceInfo.languages]
-        character.class = choice(classArray)
+
+        let statArray = getStats()
+        character.str = statArray[0]
+        character.dex = statArray[1]
+        character.con = statArray[2]
+        character.int = statArray[3]
+        character.wis = statArray[4]
+        character.cha = statArray[5]
+
+        let tempClassArray = []
+
+        if (character.str >= Math.max(...[character.dex, character.int, character.wis, character.cha])) {
+            if (classArray.includes("Fighter")) {
+                tempClassArray.push("Fighter")
+            }
+            if (classArray.includes("Knight of St. Ydris")) {
+                tempClassArray.push("Knight of St. Ydris")
+            }
+            if (classArray.includes("Warlock")) {
+                tempClassArray.push("Warlock")
+            }
+            if (classArray.includes("Desert Rider")) {
+                tempClassArray.push("Desert Rider")
+            }
+            if (classArray.includes("Pit Fighter")) {
+                tempClassArray.push("Pit Fighter")
+            }
+            if (classArray.includes("Sea Wolf")) {
+                tempClassArray.push("Sea Wolf")
+            }
+            if (classArray.includes("Basilisk Warrior")) {
+                tempClassArray.push("Basilisk Warrior")
+            }
+            if (classArray.includes("Duelist")) {
+                tempClassArray.push("Duelist")
+            }
+            if (classArray.includes("Paladin")) {
+                tempClassArray.push("Paladin")
+            }
+        } else if (character.dex >= Math.max(...[character.str, character.int, character.wis, character.cha])) {
+            if (classArray.includes("Thief")) {
+                tempClassArray.push("Thief")
+            }
+            if (classArray.includes("Ras-Godai")) {
+                tempClassArray.push("Ras-Godai")
+            }
+            if (classArray.includes("Ranger")) {
+                tempClassArray.push("Ranger")
+            }
+        } else if (character.int >= Math.max(...[character.dex, character.str, character.wis, character.cha])) {
+            if (classArray.includes("Wizard")) {
+                tempClassArray.push("Wizard")
+            }
+        } else if (character.wis >= Math.max(...[character.dex, character.int, character.str, character.cha])) {
+            if (classArray.includes("Priest")) {
+                tempClassArray.push("Priest")
+            }
+            if (classArray.includes("Seer")) {
+                tempClassArray.push("Seer")
+            }
+        } else if (character.cha >= Math.max(...[character.dex, character.int, character.wis, character.str])) {
+            if (classArray.includes("Witch")) {
+                tempClassArray.push("Witch")
+            }
+            if (classArray.includes("Bard")) {
+                tempClassArray.push("Bard")
+            }
+        }
+
+        if (tempClassArray.length > 0) {
+            character.class = choice(tempClassArray)
+        } else {
+            character.class = choice(classArray)
+        }
+
+        console.log(tempClassArray)
+
         switch (character.class) {
             case "Fighter":
                 classInfo = classes.fighter
@@ -1232,21 +1812,54 @@ window.addEventListener('DOMContentLoaded', function() {
             case "Wizard":
                 classInfo = classes.wizard
                 break
+            case "Knight of St. Ydris":
+                classInfo = classes.knightofstydris
+                break
+            case "Warlock":
+                classInfo = classes.warlock
+                character.patron = choice(["Almazzat", "Kytheros", "Shune the Vile", "Mugdulblub", "Titania", "The Willowman"])
+                break
+            case "Witch":
+                classInfo = classes.witch
+                break
+            case "Desert Rider":
+                classInfo = classes.desertrider
+                break
+            case "Pit Fighter":
+                classInfo = classes.pitfighter
+                break
+            case "Ras-Godai":
+                classInfo = classes.rasgodai
+                break
+            case "Sea Wolf":
+                classInfo = classes.seawolf
+                break
+            case "Seer":
+                classInfo = classes.seer
+                break
+            case "Basilisk Warrior":
+                classInfo = classes.basiliskwarrior
+                break
+            case "Ranger":
+                classInfo = classes.ranger
+                break
+            case "Bard":
+                classInfo = classes.bard
+                break
+            case "Duelist":
+                classInfo = classes.duelist
+                break
+            case "Paladin":
+                classInfo = classes.paladin
         }
+        // console.log(classInfo)
         let deityInfo = choice(deities)
         character.deity = deityInfo[0]
         character.alignment = deityInfo[1]
         character.title = classInfo.titles[character.alignment]
         character.background = choice(backgrounds)
-        let statArray = getStats()
-        character.str = statArray[0]
-        character.dex = statArray[1]
-        character.con = statArray[2]
-        character.int = statArray[3]
-        character.wis = statArray[4]
-        character.cha = statArray[5]
         character.initialHPRoll = getInitialHP(classInfo.hd, character.race)
-        let tempHp = character.initialHPRoll + findModifier(character.con, character.conbonus)
+        let tempHp = character.initialHPRoll + findModifier(character.con, character.conbonus) + character.hpbonus
         character.hp = tempHp > 0 ? tempHp : 1
         character.ac = 10 + findModifier(character.dex, character.dexbonus)
         character.gp = 0
@@ -1260,33 +1873,91 @@ window.addEventListener('DOMContentLoaded', function() {
                 type: "text",
                 description: misc
             }
-            if (misc == "Languages. You know two additional common languages and two rare languages.") {
-                talent = {
-                    type: "wizardLanguages",
-                    description: "Languages. You know two additional common languages and two rare languages."
-                }
-            } else if (misc == "Turn Undead. You know the turn undead spell. It doesn't count toward your number of known spells.") {
-                talent = {
-                    type: "turnUndead",
-                    description: "Turn Undead. You know the turn undead spell. It doesn't count toward your number of known spells."
-                }
-            } else if (misc == "Languages. You know Celestial, Diabolic, or Primordial.") {
-                talent = {
-                    type: "priestLanguage",
-                    description: "Languages. You know Celestial, Diabolic, or Primordial."
-                }
+            switch (misc) {
+                case "Languages. You know two additional common languages and two rare languages.":
+                    talent = {
+                        type: "wizardLanguages",
+                        description: "Languages. You know two additional common languages and two rare languages."
+                    }
+                    break
+                case "Turn Undead. You know the turn undead spell. It doesn't count toward your number of known spells.":
+                    talent = {
+                        type: "turnUndead",
+                        description: "Turn Undead. You know the turn undead spell. It doesn't count toward your number of known spells."
+                    }
+                    break
+                case "Languages. You know Celestial, Diabolic, or Primordial.":
+                    talent = {
+                        type: "priestLanguage",
+                        description: "Languages. You know Celestial, Diabolic, or Primordial."
+                    }
+                    break
+                case "Languages. You know Diabolic.":
+                    talent = {
+                        type: "knightLanguage",
+                        description: "Languages. You know Diabolic."
+                    }
+                    break
+                case "Languages. You know either Celestial, Diabolic, Draconic, Primordial, or Sylvan.":
+                    talent = {
+                        type: "warlockLanguage",
+                        description: "Languages. You know either Celestial, Diabolic, Draconic, Primordial, or Sylvan."
+                    }
+                    break
+                case "Patron. Choose a patron to serve. Your patron is the source of your supernatural gifts. Your patron can choose to grant or withhold its gifts at any time. You can gain new Patron Boons/ talents (or lose them) as a result.":
+                    talent = {
+                        type: "talentBoonChoice",
+                        description: `Patron. Your patron is ${character.patron}. Your patron is the source of your supernatural gifts. Your patron can choose to grant or withhold its gifts at any time. You can gain new Patron Boons/ talents (or lose them) as a result.`
+                    }
+                    break
+                case "Languages. You know Diabolic, Primordial, and Sylvan.":
+                    talent = {
+                        type: "witchLanguage",
+                        description: "Languages. You know Diabolic, Primordial, and Sylvan."
+                    }
+                    break
+                case "Black Lotus. You earned the right to eat a petal of the fabled black lotus flower, and you survived its sorcerous effects. Roll one talent on the Black Lotus Talents table.":
+                    talent = {
+                        type: "oneBlackLotus",
+                        description: "Black Lotus. You earned the right to eat a petal of the fabled black lotus flower, and you survived its sorcerous effects. Roll one talent on the Black Lotus Talents table."
+                    }
+                    break
+                case "Stone Skin. Add 2 + half your level (round down) to your AC if you are otherwise unarmored. You have advantage on checks to hide in natural environments.":
+                    talent = {
+                        type: "stoneSkin",
+                        description: "Stone Skin. Add 2 + half your level (round down) to your AC if you are otherwise unarmored. You have advantage on checks to hide in natural environments."
+                    }
+                    break
+                case "Languages. You know four additional common languages and one rare language.":
+                    talent = {
+                        type: "bardLanguages",
+                        description: "Languages. You know four additional common languages and one rare language."
+                    }
+                    break
+                case "Named Blade. At first level, you gain a sword of your choice. It is a +0 magic weapon. It becomes a +1 weapon at 3rd level, +2 at 5th level, and +3 at 9th level. If you lose this blade, you can find a new one by completing a holy quest of great challenge.":
+                    talent = {
+                        type: "namedBlade",
+                        description: "Named Blade. At first level, you gain a sword of your choice. It is a +0 magic weapon. It becomes a +1 weapon at 3rd level, +2 at 5th level, and +3 at 9th level. If you lose this blade, you can find a new one by completing a holy quest of great challenge."
+                    }
+                    break
             }
             character.talentsSkills[j] = talent
             j++
         }
 
-        talentRoll()
+        if (character.class == "Warlock") {
+            rollTalent(patron_boons[character.patron], "Boon")
+        } else {
+            rollTalent(classInfo.talents, "Talent")
+        }
 
         for (var i = 0; i < classInfo.items.length; i++) {
             character.items.push(classInfo.items[i])
         }
 
-        if (character.class != "Wizard") {
+        let noArmor = ["Wizard", "Basilisk Warrior"]
+
+        if (!noArmor.includes(character.class)) {
             character.items.push("Leather armor")
         }
 
@@ -1337,7 +2008,7 @@ window.addEventListener('DOMContentLoaded', function() {
             refreshSpellsBox()
         }
 
-        let customizationRequired = ["human", "statIncrease", "twelve", "wizardLanguages", "wizardIncrease", "priestLanguage"]
+        let customizationRequired = ["human", "statIncrease", "twelve", "wizardLanguages", "wizardIncrease", "priestLanguage", "witchIncrease", "twelveBoon", "warlockLanguage", "talentBoonChoice", "almazzatIncrease", "twoBoons", "desertRiderIncrease", "pitFighterIncrease", "seaWolfIncrease", "bardLanguages", "chooseTalent"]
 
         for (const key in character.talentsSkills) {
             if (customizationRequired.includes(character.talentsSkills[key].type)) {
@@ -1350,14 +2021,13 @@ window.addEventListener('DOMContentLoaded', function() {
                 contentArea.appendChild(customizationDiv)
                 refreshLanguageBox()
 
-                for (const key in character.talentsSkills) {
-                    if (character.talentsSkills[key].type != "text") {
-                        giantPulsatingTalentsHandler(character.talentsSkills[key].type, 'targets' in character.talentsSkills[key] ? character.talentsSkills[key].targets : null)
-                    }
-                }
-
                 break
+            }
+        }
 
+        for (const key in character.talentsSkills) {
+            if (character.talentsSkills[key].type != "text") {
+                giantPulsatingTalentsHandler(character.talentsSkills[key].type, 'targets' in character.talentsSkills[key] ? character.talentsSkills[key].targets : null)
             }
         }
 
@@ -1380,8 +2050,5 @@ window.addEventListener('DOMContentLoaded', function() {
             contentArea.appendChild(spellSlotsNotifier)
             generateSpellSelector()
         }
-
-
     }
 });
-
