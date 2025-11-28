@@ -1700,11 +1700,9 @@ window.addEventListener('DOMContentLoaded', function() {
 
         raceInfo = null
         classInfo = null
-
         
         character.race = choice(raceArray)
 
-        character.race = "Human"
         switch (character.race) {
             case "Dwarf":
                 raceInfo = races.dwarf
@@ -1801,10 +1799,6 @@ window.addEventListener('DOMContentLoaded', function() {
         } else {
             character.class = choice(classArray)
         }
-
-        character.class = "Warlock"
-
-        console.log(tempClassArray)
 
         switch (character.class) {
             case "Fighter":
@@ -2059,5 +2053,6 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
 
 
