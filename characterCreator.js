@@ -1433,37 +1433,37 @@ function makePDF() {
         doc.text(character.deity, 91, 195);
 
         doc.setFontSize(18);
-        doc.text((character.str).toString(), 17, 52);
+        doc.text((character.str + character.strbonus).toString(), 17, 52);
 
         doc.setFontSize(18);
         doc.text(((findModifier(character.str, character.strbonus) >= 0 ? "+" : "") + findModifier(character.str, character.strbonus).toString()), 34, 52);
 
         doc.setFontSize(18);
-        doc.text((character.int).toString(), 54, 52);
+        doc.text((character.int + character.intbonus).toString(), 54, 52);
 
         doc.setFontSize(18);
         doc.text(((findModifier(character.int, character.intbonus) >= 0 ? "+" : "") + findModifier(character.int, character.intbonus).toString()), 71, 52);
 
         doc.setFontSize(18);
-        doc.text((character.dex).toString(), 17, 77);
+        doc.text((character.dex + character.dexbonus).toString(), 17, 77);
 
         doc.setFontSize(18);
         doc.text(((findModifier(character.dex, character.dexbonus) >= 0 ? "+" : "") + findModifier(character.dex, character.dexbonus).toString()), 34, 77);
 
         doc.setFontSize(18);
-        doc.text((character.wis).toString(), 54, 77);
+        doc.text((character.wis + character.wisbonus).toString(), 54, 77);
 
         doc.setFontSize(18);
         doc.text(((findModifier(character.wis, character.wisbonus) >= 0 ? "+" : "") + findModifier(character.wis, character.wisbonus).toString()), 71, 77);
 
         doc.setFontSize(18);
-        doc.text((character.con).toString(), 17, 102);
+        doc.text((character.con + character.conbonus).toString(), 17, 102);
 
         doc.setFontSize(18);
         doc.text(((findModifier(character.con, character.conbonus) >= 0 ? "+" : "") + findModifier(character.con, character.conbonus).toString()), 34, 102);
 
         doc.setFontSize(18);
-        doc.text((character.cha).toString(), 54, 102);
+        doc.text((character.cha + character.chabonus).toString(), 54, 102);
 
         doc.setFontSize(18);
         doc.text(((findModifier(character.cha, character.chabonus) >= 0 ? "+" : "") + findModifier(character.cha, character.chabonus).toString()), 71, 102);
