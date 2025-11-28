@@ -19,6 +19,13 @@
 	font-style: normal;
 }
 
+@font-face {
+	font-family: 'Print Icon';
+	src: url('./fonts/fontello.ttf') format("truetype");
+	font-weight: 800;
+	font-style: normal;
+}
+
 @media only screen and (max-width: 500px) {
 	button {
 		width: 50% !important;
@@ -586,4 +593,8 @@ input[type="checkbox"]:checked::before {
 	font-size: 3em;
 	font-weight: 900;
 	display: none;
+	font-family: "Print Icon";
 }
+
+
+
