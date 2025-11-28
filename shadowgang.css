@@ -99,6 +99,27 @@
 		font-size: 1rem !important;
 		padding: 0.2em !important;
 	}
+
+	.injectors {
+		width: 50% !important;
+		justify-content: space-between !important;
+	}
+	
+	.injectors input {
+		margin: 3px !important;
+	}
+	
+	.injectors label {
+		margin-right: 8px !important;
+		font-size: clamp(0.6em, 1em, 1.2em) !important;
+	}
+
+	.print-button {
+		width: 12vw !important;
+		height: 12vw !important;
+		border: 1vw solid Black !important;
+		font-size: 1.5em !important;
+	}
 }
 
 .heading-large {
@@ -365,10 +386,11 @@ input[type="radio"]:checked::before {
 
 .twelve-choice {
 	font-family: "Pencil";
-	font-size: 1.2em;
+	font-size: 1.4em;
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
+	text-decoration: underline;
 	gap: 0.1em;
 }
 
@@ -500,4 +522,68 @@ input[type="checkbox"]:checked::before {
 	color: #8a8a8a;
 	width: 100%;
 	text-align: center;
+}
+
+.collapsible {
+	background-color: #eee;
+	cursor: pointer;
+	border: none;
+	text-align: center;
+	outline: none;
+	font-family: "Old Newspaper";
+	font-size: 1.25em;
+	margin-bottom: 3vh;
+	padding: 0.1em 0.2em;
+	text-align: center;
+	text-decoration: none;
+	cursor: pointer;
+	border-radius: 0.2em;
+	transition: 0.3s;
+}
+
+.active, .collapsible:hover {
+	background-color: #444444;
+	color: #EEEEEE !important;
+	border: none !important;
+}
+
+.injectors {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	display: none;
+  	overflow: hidden;
+	margin-bottom: 3vh;
+}
+
+.injectors input {
+	margin: 5px;
+}
+
+.injectors label {
+	margin-right: 10px;
+	font-family: "Old Newspaper";
+	font-size: 1.25em;
+}
+
+.injectors div {
+	white-space: nowrap;
+}
+
+.print-button {
+	width: 5vw;
+	height: 5vw;
+	line-height: 3.5vw;
+	border-radius: 50%;
+	position: fixed;
+	bottom: 1vh;
+	right: 1vw;
+	border: 0.25vw solid Black !important;
+	background-color: White;
+	color: Black;
+	font-size: 3em;
+	font-weight: 900;
+	display: none;
 }
