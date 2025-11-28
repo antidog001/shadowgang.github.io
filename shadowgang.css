@@ -580,9 +580,9 @@ input[type="checkbox"]:checked::before {
 }
 
 .print-button {
-	width: 5vw;
-	height: 5vw;
-	line-height: 3.5vw;
+	width: 4vw;
+	height: 4vw;
+	line-height: 3.25vw;
 	border-radius: 50%;
 	position: fixed;
 	bottom: 1vh;
@@ -590,11 +590,8 @@ input[type="checkbox"]:checked::before {
 	border: 0.25vw solid Black !important;
 	background-color: White;
 	color: Black;
-	font-size: 3em;
+	font-size: clamp(1em, 1.5em, 3em);
 	font-weight: 900;
 	display: none;
 	font-family: "Print Icon";
 }
-
-
-
