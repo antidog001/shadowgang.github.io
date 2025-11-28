@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shadowgang Character Creator</title>
     <link rel="stylesheet" href="shadowgang.css">
-    <script src="characterCreator.js"></script>
+    <script type="module" src="characterCreator.js"></script>
+    <script type="module" src="info.js"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
     <header class="logo-container">
@@ -17,11 +19,43 @@
         </div>
     </header>
     <button id="genButton">Generate Random Character</button>
+    <button type="button" class="collapsible" id="injectors_collapsible">Select Sources</button>
+    <div class="injectors">
+        <div>
+            <input type="checkbox" id="injector1" name="injector1" value="Core" checked>
+            <label for="injector1">Core</label><br>
+        </div>
+        <div>
+            <input type="checkbox" id="injector2" name="injector2" value="Cursed Scroll 1">
+            <label for="injector2">Cursed Scroll 1</label><br>
+        </div>
+        <div>
+            <input type="checkbox" id="injector3" name="injector3" value="Cursed Scroll 2">
+            <label for="injector3">Cursed Scroll 2</label><br>
+        </div>
+        <div>
+            <input type="checkbox" id="injector4" name="injector4" value="Cursed Scroll 3">
+            <label for="injector4">Cursed Scroll 3</label><br>
+        </div>
+        <div>
+            <input type="checkbox" id="injector5" name="injector5" value="Cursed Scroll 4">
+            <label for="injector5">Cursed Scroll 4</label><br>
+        </div>
+        <div>
+            <input type="checkbox" id="injector6" name="injector6" value="Cursed Scroll 6">
+            <label for="injector6">Cursed Scroll 6</label><br>
+        </div>
+        <div>
+            <input type="checkbox" id="injector7" name="injector7" value="Paladin Playtest">
+            <label for="injector7">Paladin Playtest</label><br>
+        </div>
+    </div>
     <div class="card" id="contentArea">
         <div class="heading-small center">No Character</div>
     </div>
     <div class="footer">
         <p>This fan-made character generator is not affiliated with, endorsed, or sponsored by The Arcane Library. Shadowdark™ and all related content are © The Arcane Library. Used under fair use for non-commercial, fan purposes. Visit thearcanelibrary.com for official materials.</p>
-    </div>
+    </div> 
+    <button class="print-button" id="print_button">🖶</button>
 </body>
 </html>
