@@ -1657,7 +1657,7 @@ window.addEventListener('DOMContentLoaded', function() {
     
     var contentArea = document.getElementById("contentArea")
 
-    genButton = document.getElementById("genButton")
+    var genButton = document.getElementById("genButton")
     genButton.onclick = function() {
         printButton.style.display = "block";
         character = {
@@ -2052,4 +2052,5 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
 
