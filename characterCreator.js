@@ -1509,8 +1509,27 @@ function makePDF() {
                             }
                         }
                     }
-                    doc.setFontSize(adjustFontSize(msg));
-                    doc.text(msg, 14, y)
+                    let currLine = ""
+                    let len = 0
+                    x = 16
+                    y = 166
+                    doc.setFontSize(16)
+                    for (let i = 0; i < msg.length; i++) {
+                        len++
+                        currLine += msg[i]
+                        if (msg[i] == " " && len > 20) {
+                            doc.text(currLine, x, y)
+                            y += 6
+                            currLine = ""
+                            x = 20
+                            len = 0
+                        }
+                        if (i == msg.length - 1) {
+                            doc.text(currLine, x, y)
+                            currLine = ""
+                            len = 0
+                        }
+                    }
                     y += 8
                 }
             }
