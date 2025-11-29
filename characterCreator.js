@@ -16,7 +16,12 @@ function rollAdvantage(d) {
 
 function findModifier(stat, statbonus) {
     const i = Math.floor(((stat + statbonus) - 10) / 2)
-    return i < -4 ? -4 : i; // modifier returned with sign ONLY for negative
+    if (i > 4) {
+        i = 4
+    } else if (i < -4) {
+        i = -4
+    }
+    return i; // modifier returned with sign ONLY for negative
 }
 
 function getInitialHP(hd, race) {
@@ -1247,7 +1252,7 @@ function handleContentInjectors() {
             type: "M",
             range: "C",
             damage: "1d4",
-            properties: [""]
+            properties: []
         },
         3: {
             name: "Crossbow",
@@ -1296,14 +1301,14 @@ function handleContentInjectors() {
             type: "M",
             range: "C",
             damage: "1d8",
-            properties: [""]
+            properties: []
         },
         10: {
             name: "Mace",
             type: "M",
             range: "C",
             damage: "1d6",
-            properties: [""]
+            properties: []
         },
         11: {
             name: "Shortbow",
@@ -1317,7 +1322,7 @@ function handleContentInjectors() {
             type: "M",
             range: "C",
             damage: "1d6",
-            properties: [""]
+            properties: []
         },
         13: {
             name: "Spear",
@@ -1475,8 +1480,43 @@ function makePDF() {
         doc.setFontSize(32);
         doc.text((character.ac).toString(), 60, 134)
 
-        let y = 32
+        let y = 166
         let x = 170
+
+        for (const item_key in character.items) {
+            for (const weapon_key in weapons) {
+                if (character.items[item_key] == weapons[weapon_key].name) {
+                    let msg = `${weapons[weapon_key].name} - ${weapons[weapon_key].type}, ${weapons[weapon_key].range}, ${weapons[weapon_key].damage}`
+                    let trueLength = 0
+                    if (weapons[weapon_key].properties.length > 0) {
+                        for (const prop_key in weapons[weapon_key].properties) {
+                            if (!weapons[weapon_key].properties[prop_key].includes("slots")) {
+                                trueLength += 1
+                            }
+                        }
+                    }
+                    if (trueLength > 0) {
+                        msg += ", "
+                    }
+                    let propLen = 0
+                    for (const prop_key in weapons[weapon_key].properties) {
+                        propLen += 1
+                        if (!weapons[weapon_key].properties[prop_key].includes("slots")) {
+                            if (propLen == trueLength) {
+                                msg += weapons[weapon_key].properties[prop_key]
+                            } else {
+                                msg += weapons[weapon_key].properties[prop_key] + ", "
+                            }
+                        }
+                    }
+                    doc.setFontSize(adjustFontSize(msg));
+                    doc.text(msg, 14, y)
+                    y += 8
+                }
+            }
+        }
+
+        y = 32
 
         doc.setFontSize(14)
         for (const talent_key in character.talentsSkills) {
@@ -1505,39 +1545,90 @@ function makePDF() {
             } else {
                 doc.text(header + ".", 170, y)
             }
-            y += 8
+            y += 6
         }
 
         for (const spell_key in character.spells) {
             doc.text("Spell - " + character.spells[spell_key].name + ".", 170, y)
-            y += 8
+            y += 6
         }
 
         doc.setFontSize(12)
 
         y = 126.25
         let y2 = 133
+        let maxItems = character.str
+        if (character.class == "Fighter") {
+            if (findModifier(character.str, character.strbonus) >= findModifier(character.con, character.conbonus)) {
+                maxItems += findModifier(character.str, character.strbonus)
+            } else {
+                maxItems += findModifier(character.con, character.conbonus)
+            }
+        }
         let twoSlots = ["Bastard sword", "Greataxe", "Greatsword"]
         let threeSlots = ["Lance"]
+        let slots = 0
+        x = 176
 
         for (let i = 0; i < character.items.length; i++) {
             if (character.items[i].includes("free to carry")) {
-                doc.text(character.items[i].split("(", 1)[0], 253, y2)
+                doc.text(character.items[i].split("(", 1)[0], 253.5, y2)
                 y2 += 6
             } else {
-                doc.text(character.items[i], 176, y)
+                slots += 1
+                doc.text(character.items[i], x, y)
                 y += 6.75
                 if (twoSlots.includes(character.items[i])) {
-                    doc.text('"', 176, y)
+                    if (y == 193.75) {
+                        y = 126.25
+                        x = 220
+                    }
+                    doc.text('            "', x, y)
                     y += 6.75
+                    slots += 1
                 } else if (threeSlots.includes(character.items[i])) {
                     for (let j = 0; j <= 1; j++) {
-                        doc.text('"', 176, y)
+                        if (y == 193.75) {
+                            y = 126.25
+                            x = 220
+                        }
+                        doc.text('            "', x, y)
                         y += 6.75
+                        slots += 1
                     }
                 }
             }
         }
+
+        let tempSlots = 10 - slots
+
+        for (let i = 0; i < tempSlots; i++) {
+            if (slots > maxItems - 1) {
+                doc.text("---", 176, y)
+                y += 6.75
+            } else {
+                y += 6.75
+                slots += 1
+            }
+        }
+
+        y = 126.25
+
+        for (let i = 0; i < 10; i++) {
+            if (slots > maxItems - 1) {
+                doc.text("---", 220, y)
+                y += 6.75
+            } else {
+                y += 6.75
+                slots += 1
+            }
+        }
+
+        if (slots > maxItems) {
+            doc.text(`You have ${slots} slots of items, but can only hold ${maxItems}!`, 176, 205)
+        }
+
+        doc.text(character.gp.toString(), 221, 115)
 
         // save
         doc.save(character.name + ".pdf");
@@ -1547,11 +1638,11 @@ function makePDF() {
 function adjustFontSize(text) {
     let fontSize = 16;
 
-    if (text.length > 18) {
+    if (text.length > 16) {
         fontSize -= (text.length - 16);
     };
 
-    return (fontSize < 6) ? 6 : fontSize;
+    return (fontSize < 12) ? 12 : fontSize;
 }
 
 var backgrounds = []
@@ -1688,7 +1779,7 @@ window.addEventListener('DOMContentLoaded', function() {
             hpbonus: 0,
             ac: 0,
             acbonus: 0,
-            gp: 0,
+            gp: 5,
             talentsSkills: {},
             items: [],
             spellSlots: 0,
@@ -1700,7 +1791,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
         raceInfo = null
         classInfo = null
-        
+
         character.race = choice(raceArray)
 
         switch (character.race) {
@@ -1800,6 +1891,8 @@ window.addEventListener('DOMContentLoaded', function() {
             character.class = choice(classArray)
         }
 
+        // console.log(tempClassArray)
+
         switch (character.class) {
             case "Fighter":
                 classInfo = classes.fighter
@@ -1863,7 +1956,6 @@ window.addEventListener('DOMContentLoaded', function() {
         let tempHp = character.initialHPRoll + findModifier(character.con, character.conbonus) + character.hpbonus
         character.hp = tempHp > 0 ? tempHp : 1
         character.ac = 10 + findModifier(character.dex, character.dexbonus)
-        character.gp = 0
 
         character.talentsSkills[0] = raceInfo.skill
 
@@ -1962,11 +2054,14 @@ window.addEventListener('DOMContentLoaded', function() {
             character.items.push("Leather armor")
         }
 
-        let items = randomInt(1, 6)
-
-        for (let i = 0; i < items; i++) {
-            character.items.push(choice(gear))
-        }
+        character.items.push("Backpack (free to carry)")
+        character.items.push("Flint and steel")
+        character.items.push("Torch")
+        character.items.push("Torch")
+        character.items.push("Rations (3)")
+        character.items.push("Iron spikes (10)")
+        character.items.push("Grappling hook")
+        character.items.push("Rope, 60'")
 
         character.spellSlots = classInfo.spells
 
@@ -2053,6 +2148,3 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
-
-
-
