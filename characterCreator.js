@@ -1576,7 +1576,7 @@ function makePDF() {
 
         y = 126.25
         let y2 = 133
-        let maxItems = character.str
+        let maxItems = (character.str > 10 ? character.str : 10) // min items is 10
         if (character.class == "Fighter") {
             if (findModifier(character.str, character.strbonus) >= findModifier(character.con, character.conbonus)) {
                 maxItems += findModifier(character.str, character.strbonus)
