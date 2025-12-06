@@ -869,7 +869,7 @@ function giantPulsatingTalentsHandler(type, targets) {
             dialogNum++
             break
         case "namedBlade":
-            character.items.push("+0 sword, choice")
+            character.items.push("+0 sword of your choice")
             break
     }
 }
@@ -1594,8 +1594,9 @@ function makePDF() {
                 doc.text(character.items[i].split("(", 1)[0], 253.5, y2)
                 y2 += 6
             } else {
+                let itemName = character.items[i].length <= 16 ? character.items[i] : (`${character.items[i].substr(0,14)}...`)
                 slots += 1
-                doc.text(character.items[i], x, y)
+                doc.text(itemName, x, y)
                 y += 6.75
                 if (twoSlots.includes(character.items[i])) {
                     if (y == 193.75) {
